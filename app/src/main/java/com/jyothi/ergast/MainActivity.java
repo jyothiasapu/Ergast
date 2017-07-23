@@ -18,6 +18,7 @@ import android.widget.Toolbar;
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.model.MainViewModel;
 import com.jyothi.ergast.util.ActivityUtils;
+import com.jyothi.ergast.util.Utils;
 
 import java.util.ArrayList;
 
@@ -154,6 +155,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
             case R.id.refresh:
                 mViewModel.refresh();
                 mAdapter.clearItems();
+                mViewModel.loadUsers(false, true);
                 break;
         }
 

@@ -135,6 +135,8 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
     @Override
     public void refresh() {
+        mPage = 0;
+        Utils.writePagePref(getApplication().getApplicationContext(), 0);
         mRepository.refreshDrivers();
     }
 

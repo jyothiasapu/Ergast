@@ -29,7 +29,7 @@ import com.google.common.base.Strings;
 import java.util.UUID;
 
 /**
- * Immutable model class for a Driver.
+ * Model class for a Driver.
  */
 @Entity(tableName = "drivers")
 public final class Driver {
