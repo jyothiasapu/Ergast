@@ -5,7 +5,9 @@ import android.app.ProgressDialog;
 import android.arch.lifecycle.LifecycleActivity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,9 +20,10 @@ import android.widget.Toolbar;
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.model.MainViewModel;
 import com.jyothi.ergast.util.ActivityUtils;
-import com.jyothi.ergast.util.Utils;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Jyothi on 7/22/16.
@@ -38,6 +41,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
 
     private ItemAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
+    private List<Driver> mFilterDrivers = null;
     private MainViewModel mViewModel;
     private ProgressDialog mProgressDialog;
     private RecyclerView mRecyclerView;
@@ -169,6 +173,16 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextChange(String newText) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            filterList(newText);
+        } else {
+            filterListBeforeN(newText);
+        }
+
+        return false;
+    }
+
+    private void filterListBeforeN(String newText) {
         if (newText.equals("")) {
             mViewModel.clearDrivers();
             mViewModel.loadUsers(false, true);
@@ -177,8 +191,28 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
             mSearchIsOn = true;
             mViewModel.getDriverWithDriverId(newText);
         }
+    }
 
-        return false;
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void filterList(String newText) {
+        List<Driver> drivers;
+        if (newText.equals("")) {
+            drivers = mViewModel.getDrivers().getValue();
+
+            mSearchIsOn = false;
+            mFilterDrivers = null;
+        } else {
+            if (mFilterDrivers == null) {
+                mFilterDrivers = mViewModel.getDrivers().getValue();
+            }
+
+            mSearchIsOn = true;
+
+            drivers = mFilterDrivers.stream()
+                    .filter(p -> p.getDriverId().startsWith(newText)).collect(Collectors.toList());
+        }
+
+        mAdapter.setItems(drivers);
     }
 
     /**
