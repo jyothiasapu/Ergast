@@ -40,4 +40,5 @@ This package holds utility class for this application.
 ### TODO
 1. Writing Automation tests
 2. Get search results from Adapter list rather than getting it from DB.
+3. Not handled case for orientation change. As per Google documentation, Its not a problem. But, need to verify.
 
