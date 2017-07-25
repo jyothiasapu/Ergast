@@ -179,6 +179,12 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
     @Override
     public void doOnQueryDone(ItemResponse response) {
+        if (response == null) {
+            mQueryDone.setValue(true);
+            mShowProgress.setValue(false);
+            return;
+        }
+
         // Page maintenance
         mPage++;
         Utils.writePagePref(getApplication().getApplicationContext(), mPage);
@@ -191,15 +197,24 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
         int page = (Integer.parseInt(response.getMRData().getOffset()) / 10);
 
         List<DriverStub> drivers = response.getMRData().getDriverTable().getDrivers();
-        for (DriverStub ds : drivers) {
-            Driver d = new Driver(ds.getDriverId(), ds.getUrl(), ds.getGivenName(),
-                    ds.getFamilyName(), ds.getDateOfBirth(), ds.getNationality(), page);
+        if (drivers != null) {
+            for (DriverStub ds : drivers) {
+                Driver d = new Driver(ds.getDriverId(), ds.getUrl(), ds.getGivenName(),
+                        ds.getFamilyName(), ds.getDateOfBirth(), ds.getNationality(), page);
 
-            mRepository.saveDriver(d);
-            list.add(d);
+                mRepository.saveDriver(d);
+                list.add(d);
+            }
+
+            mDrivers.setValue(list);
+        } else {
+            if (Integer.parseInt(response.getMRData().getOffset()) >=
+                    Integer.parseInt(response.getMRData().getTotal())) {
+                Toast.makeText(getApplication().getApplicationContext(),
+                        R.string.no_more_drivers, Toast.LENGTH_SHORT).show();
+            }
         }
 
-        mDrivers.setValue(list);
         mQueryDone.setValue(true);
         mShowProgress.setValue(false);
     }

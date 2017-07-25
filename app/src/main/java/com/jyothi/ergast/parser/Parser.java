@@ -1,5 +1,7 @@
 package com.jyothi.ergast.parser;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.jyothi.ergast.model.ItemResponse;
@@ -25,6 +27,8 @@ public class Parser {
     public ItemResponse parse() throws JSONException {
         fixJson();
 
+        Log.d(TAG, "response : " + mJsonString);
+
         return parseResponse();
     }
 
@@ -46,7 +50,8 @@ public class Parser {
                 replace("\"GivenName\"", "\"givenName\"").
                 replace("\"FamilyName\"", "\"familyName\"").
                 replace("\"DateOfBirth\"", "\"dateOfBirth\"").
-                replace("\"Nationality\"", "\"nationality\"");
+                replace("\"Nationality\"", "\"nationality\"").
+                replace("\"driverTable\":\"\"", "\"driverTable\":{}");
     }
 
     private ItemResponse parseResponse() {

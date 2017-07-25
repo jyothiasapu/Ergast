@@ -123,7 +123,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
         mTotalCount = mLayoutManager.getItemCount();
         mPastItems = mLayoutManager.findFirstVisibleItemPosition();
 
-        if (!mLoading) {
+        if (!mLoading || mSearchIsOn) {
             return;
         }
 
