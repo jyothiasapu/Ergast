@@ -57,7 +57,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
         mShowProgress = new MutableLiveData<Boolean>();
         mShowProgress.setValue(true);
 
-        getDrivers();
+        // getDrivers();
     }
 
     private void loadUsers() {

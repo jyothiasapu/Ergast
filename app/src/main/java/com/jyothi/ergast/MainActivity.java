@@ -72,6 +72,13 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
         checkPermissions();
     }
 
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+
+        mViewModel.getDrivers();
+    }
+
     private void checkPermissions() {
         ArrayList<String> allPerms = getAllPermissions();
 
