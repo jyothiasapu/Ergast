@@ -40,6 +40,15 @@ public interface DriversDao {
     List<Driver> getDrivers();
 
     /**
+     * Select all drivers from the drivers table.
+     *
+     * @return all drivers.
+     */
+    @Query("SELECT * FROM Drivers WHERE page = :p")
+    List<Driver> getDrivers(int p);
+
+
+    /**
      * Select a task by id.
      *
      * @param id the task id.

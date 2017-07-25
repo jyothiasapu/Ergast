@@ -24,7 +24,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 
 import java.util.UUID;
 
@@ -62,6 +61,10 @@ public final class Driver {
     @ColumnInfo(name = "nationality")
     public String nationality;
 
+    @NonNull
+    @ColumnInfo(name = "page")
+    public int page;
+
     /**
      * Use this constructor to specify a completed Driver. If the Driver already has an id (copy of
      * another Driver).
@@ -72,12 +75,13 @@ public final class Driver {
      * @param familyName family name of the driver
      * @param dob        date of birth of the driver
      * @param nat        nationality of the driver
+     * @param page       page number from rest query/response
      */
     @Ignore
     public Driver(@Nullable String driverId, @Nullable String url,
                   @Nullable String givenName, @Nullable String familyName,
-                  @Nullable String dob, @Nullable String nat) {
-        this(UUID.randomUUID().toString(), driverId, url, givenName, familyName, dob, nat);
+                  @Nullable String dob, @Nullable String nat, int page) {
+        this(UUID.randomUUID().toString(), driverId, url, givenName, familyName, dob, nat, page);
     }
 
     /**
@@ -91,10 +95,11 @@ public final class Driver {
      * @param familyName family name of the driver
      * @param dob        date of birth of the driver
      * @param nat        nationality of the driver
+     * @param page       page number from rest query/response
      */
     public Driver(@NonNull String id, @Nullable String driverId, @Nullable String url,
                   @Nullable String givenName, @Nullable String familyName,
-                  @Nullable String dob, @Nullable String nat) {
+                  @Nullable String dob, @Nullable String nat, int page) {
         this.id = id;
         this.driverId = driverId;
         this.url = url;
@@ -102,6 +107,7 @@ public final class Driver {
         this.familyName = familyName;
         this.dob = dob;
         this.nationality = nat;
+        this.page = page;
     }
 
     public Driver() {
@@ -143,6 +149,11 @@ public final class Driver {
         return nationality;
     }
 
+    @NonNull
+    public int getPage() {
+        return page;
+    }
+
     public void setDriverId(@Nullable String driverId) {
         this.driverId = driverId;
     }
@@ -167,23 +178,28 @@ public final class Driver {
         this.nationality = nationality;
     }
 
+    public void setPage(@NonNull int page) {
+        this.page = page;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Driver task = (Driver) o;
-        return Objects.equal(id, task.id) &&
-                Objects.equal(driverId, task.driverId) &&
-                Objects.equal(url, task.url) &&
-                Objects.equal(givenName, task.givenName) &&
-                Objects.equal(familyName, task.familyName) &&
-                Objects.equal(driverId, task.driverId) &&
-                Objects.equal(nationality, task.nationality);
+        Driver driver = (Driver) o;
+        return Objects.equal(id, driver.id) &&
+                Objects.equal(driverId, driver.driverId) &&
+                Objects.equal(url, driver.url) &&
+                Objects.equal(givenName, driver.givenName) &&
+                Objects.equal(familyName, driver.familyName) &&
+                Objects.equal(driverId, driver.driverId) &&
+                Objects.equal(nationality, driver.nationality) &&
+                Objects.equal(page, driver.page);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, driverId, url, givenName, familyName, dob, nationality);
+        return Objects.hashCode(id, driverId, url, givenName, familyName, dob, nationality, page);
     }
 
     @Override

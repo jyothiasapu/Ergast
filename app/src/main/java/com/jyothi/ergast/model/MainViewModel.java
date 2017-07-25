@@ -82,6 +82,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
         }
 
         mRepository.getDrivers(new DriversDataSource.LoadDriversCallback() {
+
             @Override
             public void onDriversLoaded(List<Driver> drivers) {
                 if (drivers == null || drivers.size() == 0) {
@@ -90,11 +91,11 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
                 List<Driver> list = mDrivers.getValue();
                 if (list == null) {
-                    list = new ArrayList<Driver>();
-                }
-
-                for (Driver d : drivers) {
-                    list.add(d);
+                    list = drivers;
+                } else {
+                    for (Driver d : drivers) {
+                        list.add(d);
+                    }
                 }
 
                 mDrivers.setValue(list);
@@ -165,6 +166,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     public void loadNextSetUsers() {
         mQueryDone.setValue(false);
         mShowProgress.setValue(true);
+        // loadUsers(false, true);
 
         new Thread(new Runnable() {
             @Override
@@ -186,10 +188,12 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
             list = new ArrayList<Driver>();
         }
 
+        int page = (Integer.parseInt(response.getMRData().getOffset()) / 10);
+
         List<DriverStub> drivers = response.getMRData().getDriverTable().getDrivers();
         for (DriverStub ds : drivers) {
             Driver d = new Driver(ds.getDriverId(), ds.getUrl(), ds.getGivenName(),
-                    ds.getFamilyName(), ds.getDateOfBirth(), ds.getNationality());
+                    ds.getFamilyName(), ds.getDateOfBirth(), ds.getNationality(), page);
 
             mRepository.saveDriver(d);
             list.add(d);

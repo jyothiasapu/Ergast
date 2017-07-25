@@ -85,6 +85,31 @@ public class DriversLocalDataSource implements DriversDataSource, Destroy {
         mAppExecutors.diskIO().execute(runnable);
     }
 
+    @Override
+    public void getDrivers(@NonNull int page, @NonNull LoadDriversCallback callback) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                final List<Driver> drivers = mDriversDao.getDrivers(page);
+                mAppExecutors.mainThread().execute(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (drivers.isEmpty()) {
+                            // This will be called if the table is new or just empty.
+                            callback.onDataNotAvailable();
+                        } else {
+                            callback.onDriversLoaded(drivers);
+                        }
+                    }
+                });
+            }
+        };
+
+        mAppExecutors.diskIO().execute(runnable);
+
+    }
+
     /**
      * Note: {@link GetDriverCallback#onDataNotAvailable()} is fired if the {@link Driver} isn't
      * found.

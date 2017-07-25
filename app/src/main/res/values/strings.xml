@@ -7,4 +7,5 @@
     <string name="search">Search</string>
     <string name="refresh">Refresh</string>
     <string name="driver_not_present">Driver not present</string>
+    <string name="enter_driver_id">Enter driver id to search</string>
 </resources>

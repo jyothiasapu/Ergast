@@ -93,6 +93,23 @@ public class DriversRepository implements DriversDataSource, Destroy {
     }
 
     @Override
+    public void getDrivers(@NonNull int page, @NonNull LoadDriversCallback callback) {
+        // Query the local storage if available. If not, query the network.
+        mDriversLocalDataSource.getDrivers(page, new LoadDriversCallback() {
+
+            @Override
+            public void onDriversLoaded(List<Driver> drivers) {
+                callback.onDriversLoaded(drivers);
+            }
+
+            @Override
+            public void onDataNotAvailable() {
+                callback.onDataNotAvailable();
+            }
+        });
+    }
+
+    @Override
     public void saveDriver(@NonNull Driver driver) {
         checkNotNull(driver);
         mDriversLocalDataSource.saveDriver(driver);

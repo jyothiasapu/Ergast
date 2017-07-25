@@ -49,6 +49,8 @@ public interface DriversDataSource {
 
     void getDrivers(@NonNull LoadDriversCallback callback);
 
+    void getDrivers(@NonNull int page, @NonNull LoadDriversCallback callback);
+
     void getDriver(@NonNull String id, @NonNull GetDriverCallback callback);
 
     void saveDriver(@NonNull Driver driver);

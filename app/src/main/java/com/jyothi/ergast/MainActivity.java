@@ -148,6 +148,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
         searchItem.setActionView(searchView);
 
         searchView.setOnQueryTextListener(this);
+        searchView.setQueryHint(getString(R.string.enter_driver_id));
 
         return true;
     }
