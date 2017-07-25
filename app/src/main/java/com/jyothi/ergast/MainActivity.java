@@ -4,7 +4,10 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.LifecycleActivity;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -15,12 +18,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.model.MainViewModel;
 import com.jyothi.ergast.util.ActivityUtils;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -135,13 +140,42 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
         }
 
         if ((mVisibleCount + mPastItems) >= mTotalCount) {
-            mLoading = false;
-
             getNetPageItems();
         }
     }
 
+    public boolean isWifiEnabled() {
+        WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        return wifi.isWifiEnabled();
+    }
+
+    /**
+     * @return null if unconfirmed
+     */
+    public Boolean isMobileDataEnabled() {
+        Object connectivityService = getSystemService(CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) connectivityService;
+
+        try {
+            Class<?> c = Class.forName(cm.getClass().getName());
+            Method m = c.getDeclaredMethod("getMobileDataEnabled");
+            m.setAccessible(true);
+            return (Boolean) m.invoke(cm);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void getNetPageItems() {
+        if (!isWifiEnabled() && !isMobileDataEnabled()) {
+            Toast.makeText(this, R.string.wifi_or_data_not_enabled, Toast.LENGTH_SHORT).show();
+            mLoading = true;
+            return;
+        } else {
+            mLoading = false;
+        }
+
         mViewModel.loadNextSetUsers();
     }
 
@@ -232,6 +266,9 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
     public ArrayList<String> getAllPermissions() {
         ArrayList<String> allPermissions = new ArrayList<String>();
         allPermissions.add(Manifest.permission.INTERNET);
+        allPermissions.add(Manifest.permission.ACCESS_WIFI_STATE);
+        allPermissions.add(Manifest.permission.CHANGE_WIFI_STATE);
+        allPermissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
 
         return allPermissions;
     }

@@ -9,4 +9,5 @@
     <string name="driver_not_present">Driver not present</string>
     <string name="enter_driver_id">Enter driver id to search</string>
     <string name="no_more_drivers">No more drivers available</string>
+    <string name="wifi_or_data_not_enabled">Wifi or data is not enabled</string>
 </resources>
