@@ -1,4 +1,10 @@
 # Ergast
+
+This is an android application displays drivers informatrion in a list, from Ergast Drivers API. And Application provides searchview, to search about a driver present in the list view. To reduce the network interactions, storing the fetched drivers into a local database.
+
+Used MVVM Architectural pattern to design this application. And used Android architectural components(LiveData, ViewModel and Room database) to implement this application.
+
+
 #### com.jyothi.ergast
 This package holds view related class for this application.
 
@@ -38,7 +44,7 @@ This package holds Room database classes for this application.
 This package holds utility class for this application.
 
 ### TODO
-1. Writing Automation tests
+1. Automation tests
 2. Get search results from Adapter list rather than getting it from DB, for OS versions below Android N.
-3. Not handled case for orientation change. As per Google documentation, Its not a problem. But, need to verify.
+
 
