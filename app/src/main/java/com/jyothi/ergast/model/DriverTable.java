@@ -8,28 +8,28 @@ import java.util.List;
 
 public class DriverTable {
 
-    private List<DriverStub> driver;
+    private List<DriverStub> drivers;
 
     public DriverTable(List<DriverStub> list) {
-        this.driver = list;
+        this.drivers = list;
     }
 
     public List<DriverStub> getDrivers() {
-        return driver;
+        return drivers;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("\"driver\":[");
+        sb.append("\"drivers\":[");
 
-        for (DriverStub r : driver) {
+        for (DriverStub r : drivers) {
             sb.append(r.toString());
             sb.append(",");
         }
 
-        if (driver.size() > 0) {
+        if (drivers.size() > 0) {
             sb.deleteCharAt(sb.length() - 1);
         }
 

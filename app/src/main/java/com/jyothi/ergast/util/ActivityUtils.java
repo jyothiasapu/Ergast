@@ -27,7 +27,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 
-import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.data.source.DriversRepository;
 import com.jyothi.ergast.data.source.local.DriversLocalDataSource;
 import com.jyothi.ergast.data.source.local.ErgastDatabase;
@@ -54,10 +53,10 @@ public class ActivityUtils {
         transaction.commit();
     }
 
-    public static DriversRepository provideTasksRepository(@NonNull Context context) {
+    public static DriversRepository provideTasksRepository(@NonNull Context context, AppExecutors executors) {
         checkNotNull(context);
         ErgastDatabase database = ErgastDatabase.getInstance(context);
-        return DriversRepository.getInstance(DriversLocalDataSource.getInstance(new AppExecutors(),
+        return DriversRepository.getInstance(DriversLocalDataSource.getInstance(executors,
                 database.driverDao()));
     }
 

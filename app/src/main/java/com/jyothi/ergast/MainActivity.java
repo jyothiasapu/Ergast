@@ -201,7 +201,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
             case R.id.refresh:
                 mViewModel.refresh();
                 mAdapter.clearItems();
-                mViewModel.loadUsers(false, true);
+                mViewModel.loadDrivers(false, true);
                 break;
         }
 
@@ -227,7 +227,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
     private void filterListBeforeN(String newText) {
         if (newText.equals("")) {
             mViewModel.clearDrivers();
-            mViewModel.loadUsers(false, true);
+            mViewModel.loadDrivers(false, true);
             mSearchIsOn = false;
         } else {
             mSearchIsOn = true;

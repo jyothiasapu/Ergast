@@ -7,7 +7,6 @@ import com.google.gson.stream.JsonReader;
 import com.jyothi.ergast.model.ItemResponse;
 
 import org.json.JSONException;
-import org.json.XML;
 
 import java.io.StringReader;
 
@@ -33,7 +32,7 @@ public class Parser {
     }
 
     private void fixJson() throws JSONException {
-        mJsonString = XML.toJSONObject(mJsonString).toString();
+        //mJsonString = XML.toJSONObject(mJsonString).toString();
 
         mJsonString = mJsonString.
                 replace("\"MRData\"", "\"mRData\"").

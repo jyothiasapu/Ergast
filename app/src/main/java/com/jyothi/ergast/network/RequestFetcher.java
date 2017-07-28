@@ -10,6 +10,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.jyothi.ergast.interfaces.Destroy;
 import com.jyothi.ergast.interfaces.NetworkCallback;
 import com.jyothi.ergast.parser.Parser;
+import com.jyothi.ergast.util.AppExecutors;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,13 +23,15 @@ public class RequestFetcher implements Destroy {
 
     private static final String TAG = "RequestFetcher";
 
-    private final String URL = "http://ergast.com/api/f1/drivers?limit=10";
+    private final String URL = "http://ergast.com/api/f1/drivers.json?limit=10";
     private final String URL_EXTN = "&offset=";
 
     private NetworkCallback mCallback;
+    private AppExecutors mExecutors;
 
-    public RequestFetcher(NetworkCallback l) {
+    public RequestFetcher(NetworkCallback l, AppExecutors exe) {
         mCallback = l;
+        mExecutors = exe;
     }
 
     public String createUrl(int page) {
@@ -56,12 +59,7 @@ public class RequestFetcher implements Destroy {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        try {
-                            Parser p = new Parser(response);
-                            mCallback.doOnQueryDone(p.parse());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        mExecutors.networkIO().execute(parseResponse(response));
                     }
                 },
                 new Response.ErrorListener() {
@@ -76,6 +74,17 @@ public class RequestFetcher implements Destroy {
         return sr;
     }
 
+    private Runnable parseResponse(final String response) {
+        return () -> {
+            try {
+                Parser p = new Parser(response);
+                mCallback.doOnQueryDone(p.parse());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        };
+    }
+
     /**
      * Creates json based network request.
      *
@@ -83,16 +92,11 @@ public class RequestFetcher implements Destroy {
      */
     public JsonObjectRequest getJsonRequest(int page) {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, createUrl(page), null, new Response.Listener<JSONObject>() {
+                (createUrl(page), null, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        try {
-                            Parser p = new Parser(response.toString());
-                            mCallback.doOnQueryDone(p.parse());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        mExecutors.networkIO().execute(parseResponse(response.toString()));
                     }
                 }, new Response.ErrorListener() {
 
@@ -108,5 +112,6 @@ public class RequestFetcher implements Destroy {
     @Override
     public void tearDown() {
         mCallback = null;
+        mExecutors = null;
     }
 }
