@@ -8,9 +8,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -28,7 +26,6 @@ import com.jyothi.ergast.util.ActivityUtils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Jyothi on 7/22/16.
@@ -215,46 +212,15 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            filterList(newText);
+        mAdapter.getFilter().filter(newText);
+
+        if (newText.equals("")) {
+            mSearchIsOn = false;
         } else {
-            filterListBeforeN(newText);
+            mSearchIsOn = true;
         }
 
         return false;
-    }
-
-    private void filterListBeforeN(String newText) {
-        if (newText.equals("")) {
-            mViewModel.clearDrivers();
-            mViewModel.loadDrivers(false, true);
-            mSearchIsOn = false;
-        } else {
-            mSearchIsOn = true;
-            mViewModel.getDriverWithDriverId(newText);
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    private void filterList(String newText) {
-        List<Driver> drivers;
-        if (newText.equals("")) {
-            drivers = mViewModel.getDrivers().getValue();
-
-            mSearchIsOn = false;
-            mFilterDrivers = null;
-        } else {
-            if (mFilterDrivers == null) {
-                mFilterDrivers = mViewModel.getDrivers().getValue();
-            }
-
-            mSearchIsOn = true;
-
-            drivers = mFilterDrivers.stream()
-                    .filter(p -> p.getDriverId().startsWith(newText)).collect(Collectors.toList());
-        }
-
-        mAdapter.setItems(drivers);
     }
 
     /**

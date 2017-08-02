@@ -4,6 +4,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.jyothi.ergast.data.Driver;
@@ -17,9 +19,10 @@ import java.util.List;
  */
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.CustomViewHolder>
-        implements ItemAdapterInterface, Destroy {
+        implements ItemAdapterInterface, Filterable, Destroy {
 
     private List<Driver> mItems;
+    private DriverFilter mDriverFilter = null;
 
     public ItemAdapter(List<Driver> items) {
         this.mItems = items;
@@ -62,6 +65,15 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.CustomViewHold
         return (null != mItems ? mItems.size() : 0);
     }
 
+    @Override
+    public Filter getFilter() {
+        if (mDriverFilter == null) {
+            mDriverFilter = new DriverFilter(mItems, this);
+        }
+
+        return mDriverFilter;
+    }
+
     public class CustomViewHolder extends RecyclerView.ViewHolder {
 
         public TextView mNationality;
@@ -84,10 +96,20 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.CustomViewHold
     }
 
     @Override
+    public void clearFilter() {
+        if (mDriverFilter != null) {
+            mDriverFilter.tearDown();
+            mDriverFilter = null;
+        }
+    }
+
+    @Override
     public void tearDown() {
         if (mItems != null) {
             mItems.clear();
             mItems = null;
         }
+
+        clearFilter();
     }
 }

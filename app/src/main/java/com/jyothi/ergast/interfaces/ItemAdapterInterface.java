@@ -14,4 +14,6 @@ public interface ItemAdapterInterface {
 
     public void clearItems();
 
+    public void clearFilter();
+
 }
