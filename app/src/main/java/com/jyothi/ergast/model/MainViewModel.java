@@ -35,7 +35,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     private static final String TAG = "MainViewModel";
 
     private volatile int mPage = 0;
-    private volatile boolean mEndOfDrivers = false;
+    private volatile MutableLiveData<Boolean> mEndOfDrivers;
 
     private AppExecutors mExecutors;
     private DriversRepository mRepository;
@@ -49,7 +49,8 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
         super(app);
 
         mPage = Utils.readPagePref(app.getApplicationContext(), mPage);
-        mEndOfDrivers = Utils.readEndOfDriversPref(app.getApplicationContext());
+        mEndOfDrivers = new MutableLiveData<Boolean>();
+        mEndOfDrivers.setValue(Utils.readEndOfDriversPref(app.getApplicationContext()));
 
         mExecutors = ((Ergast) app).getExecutors();
         mRepository = ActivityUtils.provideTasksRepository(app.getApplicationContext(),
@@ -133,10 +134,15 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     }
 
     @Override
+    public LiveData<Boolean> getEndOfDrivers() {
+        return mEndOfDrivers;
+    }
+
+    @Override
     public void refresh() {
         mPage = 0;
         Utils.writePagePref(getApplication().getApplicationContext(), 0);
-
+        Utils.writeEndOfDriversPref(getApplication().getApplicationContext(), false);
         setEndOfDrivers(false);
 
         mRepository.refreshDrivers();
@@ -165,20 +171,19 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
     @Override
     public void loadNextSetUsers() {
-        if (mEndOfDrivers) {
+        if (mEndOfDrivers.getValue()) {
             Toast.makeText(getApplication().getApplicationContext(),
                     R.string.no_more_drivers, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        mShowProgress.setValue(true);
         // loadDrivers(false, true);
 
         fetchDrivers();
     }
 
     private void fetchDrivers() {
-        mQueryDone.setValue(false);
+        setQueryDone(false);
 
         Runnable runnable = () -> {
             //StringRequest req = mRequestFetcher.getRequest(mPage);
@@ -217,11 +222,16 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
             mPage++;
             Utils.writePagePref(getApplication().getApplicationContext(), mPage);
 
+            if (list.size() < (Utils.MIN_PAGES_CONSTANT * Utils.ITEMS_PER_PAGE_CONSTANT)) {
+                loadNextSetUsers();
+            }
+
             mExecutors.mainThread().execute(setDrivers(list));
         } else {
             if (Integer.parseInt(response.getMRData().getOffset()) >=
                     Integer.parseInt(response.getMRData().getTotal())) {
                 setEndOfDrivers(true);
+                Utils.writeEndOfDriversPref(getApplication().getApplicationContext(), true);
                 mExecutors.mainThread().execute(showToast(R.string.no_more_drivers));
             }
         }
@@ -229,9 +239,10 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
         mExecutors.mainThread().execute(setParamsAfterQueryDone());
     }
 
-    private void setEndOfDrivers(boolean val) {
-        mEndOfDrivers = val;
-        Utils.writeEndOfDriversPref(getApplication().getApplicationContext(), val);
+    private Runnable setEndOfDrivers(boolean val) {
+        return () -> {
+            mEndOfDrivers.setValue(val);
+        };
     }
 
     private Runnable showToast(final int id) {
@@ -244,7 +255,14 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     private Runnable setParamsAfterQueryDone() {
         return () -> {
             mQueryDone.setValue(true);
-            mShowProgress.setValue(false);
+            //mShowProgress.setValue(false);
+        };
+    }
+
+    private Runnable setQueryDone(boolean val) {
+        return () -> {
+            mQueryDone.setValue(val);
+            //mShowProgress.setValue(false);
         };
     }
 
@@ -283,4 +301,5 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
         list.clear();
         mDrivers.setValue(list);
     }
+
 }

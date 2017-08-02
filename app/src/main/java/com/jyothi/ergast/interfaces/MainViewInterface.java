@@ -22,5 +22,7 @@ public interface MainViewInterface {
 
     public LiveData<Boolean> getQueryDone();
 
+    public LiveData<Boolean> getEndOfDrivers();
+
     public void refresh();
 }

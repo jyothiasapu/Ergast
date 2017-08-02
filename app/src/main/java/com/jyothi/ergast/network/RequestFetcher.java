@@ -11,6 +11,7 @@ import com.jyothi.ergast.interfaces.Destroy;
 import com.jyothi.ergast.interfaces.NetworkCallback;
 import com.jyothi.ergast.parser.Parser;
 import com.jyothi.ergast.util.AppExecutors;
+import com.jyothi.ergast.util.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,7 +24,7 @@ public class RequestFetcher implements Destroy {
 
     private static final String TAG = "RequestFetcher";
 
-    private final String URL = "http://ergast.com/api/f1/drivers.json?limit=10";
+    private final String URL = "http://ergast.com/api/f1/drivers.json?limit=" + Utils.ITEMS_PER_PAGE_CONSTANT;
     private final String URL_EXTN = "&offset=";
 
     private NetworkCallback mCallback;
@@ -39,7 +40,7 @@ public class RequestFetcher implements Destroy {
         sb.append(URL);
 
         if (page != 0) {
-            sb.append(URL_EXTN + (page * 10));
+            sb.append(URL_EXTN + (page * Utils.ITEMS_PER_PAGE_CONSTANT));
         }
 
         Log.d(TAG, "Query : " + sb.toString());

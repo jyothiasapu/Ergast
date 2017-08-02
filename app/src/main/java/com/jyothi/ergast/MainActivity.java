@@ -8,7 +8,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -22,6 +24,7 @@ import android.widget.Toolbar;
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.model.MainViewModel;
 import com.jyothi.ergast.util.ActivityUtils;
+import com.jyothi.ergast.util.Utils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -40,6 +43,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
     private int mPastItems, mVisibleCount, mTotalCount;
     private boolean mLoading = true;
     private boolean mSearchIsOn = false;
+    private boolean mEndOfDrivers = false;
 
     private ItemAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
@@ -108,6 +112,10 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
             mLoading = queryDone;
         });
 
+        mViewModel.getEndOfDrivers().observe(this, endOfDrivers -> {
+            mEndOfDrivers = endOfDrivers;
+        });
+
         mViewModel.getShowProgress().observe(this, showProgress -> {
             if (showProgress) {
                 startProgressDialog();
@@ -136,7 +144,12 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
             return;
         }
 
-        if ((mVisibleCount + mPastItems) >= mTotalCount) {
+        if ((mVisibleCount + mPastItems) >=
+                (mTotalCount - ((Utils.MIN_PAGES_CONSTANT - 1) * Utils.ITEMS_PER_PAGE_CONSTANT))) {
+            if (mEndOfDrivers) {
+                return;
+            }
+
             getNetPageItems();
         }
     }
@@ -146,21 +159,26 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
         return wifi.isWifiEnabled();
     }
 
-    /**
-     * @return null if unconfirmed
-     */
     public Boolean isMobileDataEnabled() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return (Settings.Global.getInt(getContentResolver(), "mobile_data", 0) == 1);
+        } else {
+            // TODO: fix this
+        }
+
+        return false;
+    }
+
+    private Boolean oldGetMobileData() {
         Object connectivityService = getSystemService(CONNECTIVITY_SERVICE);
         ConnectivityManager cm = (ConnectivityManager) connectivityService;
-
         try {
             Class<?> c = Class.forName(cm.getClass().getName());
             Method m = c.getDeclaredMethod("getMobileDataEnabled");
             m.setAccessible(true);
             return (Boolean) m.invoke(cm);
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            return false;
         }
     }
 

@@ -14,6 +14,9 @@ public class Utils {
     public static final String PAGE_PREFERENCE = "page_pref";
     public static final String END_OF_DRIVERS_PREFERENCE = "end_of_drivers_pref";
 
+    public static final int MIN_PAGES_CONSTANT = 4;
+    public static final int ITEMS_PER_PAGE_CONSTANT = 10;
+
     public static void writeIntPref(Context ctx, String key,
                                     int val) {
         SharedPreferences sharedPref = ctx.getSharedPreferences(PREFERENCE_FILE, Context.MODE_PRIVATE);
