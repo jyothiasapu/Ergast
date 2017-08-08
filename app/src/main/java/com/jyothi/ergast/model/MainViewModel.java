@@ -230,7 +230,8 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
         } else {
             if (Integer.parseInt(response.getMRData().getOffset()) >=
                     Integer.parseInt(response.getMRData().getTotal())) {
-                setEndOfDrivers(true);
+                // TODO: Need to optimize context switching
+                mExecutors.mainThread().execute(setEndOfDrivers(true));
                 Utils.writeEndOfDriversPref(getApplication().getApplicationContext(), true);
                 mExecutors.mainThread().execute(showToast(R.string.no_more_drivers));
             }

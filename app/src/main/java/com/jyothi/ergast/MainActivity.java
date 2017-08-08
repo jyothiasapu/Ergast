@@ -150,7 +150,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
                 return;
             }
 
-            getNetPageItems();
+            getNextPageItems();
         }
     }
 
@@ -182,7 +182,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
         }
     }
 
-    public void getNetPageItems() {
+    public void getNextPageItems() {
         if (!isWifiEnabled() && !isMobileDataEnabled()) {
             Toast.makeText(this, R.string.wifi_or_data_not_enabled, Toast.LENGTH_SHORT).show();
             mLoading = true;
