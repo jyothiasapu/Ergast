@@ -34,6 +34,7 @@ import java.util.UUID;
 public final class Driver {
 
     @PrimaryKey
+    @NonNull
     @ColumnInfo(name = "entryid")
     public String id;
 

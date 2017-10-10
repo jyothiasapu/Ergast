@@ -25,13 +25,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Concrete implementation to load tasks from the data sources into a cache.
- * <p>
- * For simplicity, this implements a dumb synchronisation between locally persisted data and data
- * obtained from the server, by using the remote data source only if the local database doesn't
- * exist or is empty.
- */
+
 public class DriversRepository implements DriversDataSource, Destroy {
 
     private static DriversRepository INSTANCE = null;
@@ -43,12 +37,7 @@ public class DriversRepository implements DriversDataSource, Destroy {
         mDriversLocalDataSource = checkNotNull(tasksLocalDataSource);
     }
 
-    /**
-     * Returns the single instance of this class, creating it if necessary.
-     *
-     * @param tasksLocalDataSource the device storage data source
-     * @return the {@link DriversRepository} instance
-     */
+
     public static DriversRepository getInstance(DriversDataSource tasksLocalDataSource) {
         if (INSTANCE == null) {
             INSTANCE = new DriversRepository(tasksLocalDataSource);
@@ -57,21 +46,10 @@ public class DriversRepository implements DriversDataSource, Destroy {
         return INSTANCE;
     }
 
-    /**
-     * Used to force {@link #getInstance(DriversDataSource)} to create a new instance
-     * next time it's called.
-     */
     public static void destroyInstance() {
         INSTANCE = null;
     }
 
-    /**
-     * Gets tasks from cache, local data source (SQLite), whichever is
-     * available first.
-     * <p>
-     * Note: {@link LoadDriversCallback#onDataNotAvailable()} is fired if all data sources fail to
-     * get the data.
-     */
     @Override
     public void getDrivers(@NonNull final LoadDriversCallback callback) {
         checkNotNull(callback);
@@ -89,11 +67,10 @@ public class DriversRepository implements DriversDataSource, Destroy {
                 callback.onDataNotAvailable();
             }
         });
-
     }
 
     @Override
-    public void getDrivers(@NonNull int page, @NonNull LoadDriversCallback callback) {
+    public void getDrivers(@NonNull int page, final @NonNull LoadDriversCallback callback) {
         // Query the local storage if available. If not, query the network.
         mDriversLocalDataSource.getDrivers(page, new LoadDriversCallback() {
 
@@ -115,13 +92,6 @@ public class DriversRepository implements DriversDataSource, Destroy {
         mDriversLocalDataSource.saveDriver(driver);
     }
 
-    /**
-     * Gets tasks from local data source (sqlite) unless the table is new or empty. In that case it
-     * uses the network data source. This is done to simplify the sample.
-     * <p>
-     * Note: {@link GetDriverCallback#onDataNotAvailable()} is fired if both data sources fail to
-     * get the data.
-     */
     @Override
     public void getDriver(@NonNull final String driverId, @NonNull final GetDriverCallback callback) {
         checkNotNull(driverId);

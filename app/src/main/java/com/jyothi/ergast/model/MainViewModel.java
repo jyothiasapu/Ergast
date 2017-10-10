@@ -48,7 +48,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     public MainViewModel(Application app) {
         super(app);
 
-        mPage = Utils.readPagePref(app.getApplicationContext(), mPage);
+        //mPage = Utils.readPagePref(app.getApplicationContext(), mPage);
         mEndOfDrivers = new MutableLiveData<Boolean>();
         mEndOfDrivers.setValue(Utils.readEndOfDriversPref(app.getApplicationContext()));
 
@@ -65,24 +65,16 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
         mShowProgress = new MutableLiveData<Boolean>();
         mShowProgress.setValue(true);
-
-        // getDrivers();
     }
 
-    public void loadDrivers(boolean forceUpdate, final boolean showLoadingUI) {
-        mQueryDone.setValue(false);
-        if (showLoadingUI) {
-            mShowProgress.setValue(true);
-        }
+    public void loadDrivers() {
+        mExecutors.mainThread().execute(setParamsAfterQueryDone(false));
 
-        if (forceUpdate) {
-            mRepository.refreshDrivers();
-        }
-
-        mRepository.getDrivers(new DriversDataSource.LoadDriversCallback() {
+        mRepository.getDrivers(mPage, new DriversDataSource.LoadDriversCallback() {
 
             @Override
             public void onDriversLoaded(List<Driver> drivers) {
+
                 if (drivers == null || drivers.size() == 0) {
                     fetchDrivers();
                     return;
@@ -99,11 +91,9 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
                 mDrivers.setValue(list);
 
-                if (showLoadingUI) {
-                    mShowProgress.setValue(false);
-                }
+                mPage++;
 
-                mQueryDone.setValue(true);
+                mExecutors.mainThread().execute(setParamsAfterQueryDone(true));
             }
 
             @Override
@@ -117,7 +107,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     public LiveData<List<Driver>> getDrivers() {
         if (mDrivers == null) {
             mDrivers = new MutableLiveData<List<Driver>>();
-            loadDrivers(false, true);
+            loadDrivers();
         }
 
         return mDrivers;
@@ -141,7 +131,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     @Override
     public void refresh() {
         mPage = 0;
-        Utils.writePagePref(getApplication().getApplicationContext(), 0);
+        // Utils.writePagePref(getApplication().getApplicationContext(), 0);
         Utils.writeEndOfDriversPref(getApplication().getApplicationContext(), false);
         setEndOfDrivers(false);
 
@@ -160,8 +150,12 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
             @Override
             public void onDataNotAvailable() {
                 List<Driver> list = mDrivers.getValue();
-                list.clear();
-                mDrivers.setValue(list);
+                if (list != null) {
+                    list.clear();
+                    mDrivers.setValue(list);
+                } else {
+                    mDrivers.setValue(new ArrayList<Driver>());
+                }
 
                 Toast.makeText(getApplication().getApplicationContext(),
                         R.string.driver_not_present, Toast.LENGTH_SHORT).show();
@@ -177,18 +171,20 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
             return;
         }
 
-        // loadDrivers(false, true);
+        loadDrivers();
 
-        fetchDrivers();
+        // fetchDrivers();
     }
 
     private void fetchDrivers() {
         setQueryDone(false);
 
-        Runnable runnable = () -> {
-            //StringRequest req = mRequestFetcher.getRequest(mPage);
-            JsonRequest req = mRequestFetcher.getJsonRequest(mPage);
-            mNetworkQueue.addToRequestQueue(req);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                JsonRequest req = mRequestFetcher.getJsonRequest(mPage);
+                mNetworkQueue.addToRequestQueue(req);
+            }
         };
 
         mExecutors.networkIO().execute(runnable);
@@ -197,7 +193,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     @Override
     public void doOnQueryDone(ItemResponse response) {
         if (response == null) {
-            mExecutors.mainThread().execute(setParamsAfterQueryDone());
+            mExecutors.mainThread().execute(setParamsAfterQueryDone(true));
             return;
         }
 
@@ -220,7 +216,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
             // Page maintenance
             mPage++;
-            Utils.writePagePref(getApplication().getApplicationContext(), mPage);
+            // Utils.writePagePref(getApplication().getApplicationContext(), mPage);
 
             if (list.size() < (Utils.MIN_PAGES_CONSTANT * Utils.ITEMS_PER_PAGE_CONSTANT)) {
                 loadNextSetUsers();
@@ -230,52 +226,60 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
         } else {
             if (Integer.parseInt(response.getMRData().getOffset()) >=
                     Integer.parseInt(response.getMRData().getTotal())) {
-                // TODO: Need to optimize context switching
-                mExecutors.mainThread().execute(setEndOfDrivers(true));
                 Utils.writeEndOfDriversPref(getApplication().getApplicationContext(), true);
-                mExecutors.mainThread().execute(showToast(R.string.no_more_drivers));
+
+                mExecutors.mainThread().execute(setEndOfDrivers(true));
+            } else {
+                mExecutors.mainThread().execute(setParamsAfterQueryDone(true));
             }
         }
-
-        mExecutors.mainThread().execute(setParamsAfterQueryDone());
     }
 
-    private Runnable setEndOfDrivers(boolean val) {
-        return () -> {
-            mEndOfDrivers.setValue(val);
+    private Runnable setEndOfDrivers(final boolean val) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                mEndOfDrivers.setValue(val);
+                setQueryDone(true);
+
+                if (val) {
+                    Toast.makeText(getApplication().getApplicationContext(),
+                            R.string.no_more_drivers, Toast.LENGTH_SHORT).show();
+                }
+            }
         };
     }
 
-    private Runnable showToast(final int id) {
-        return () -> {
-            Toast.makeText(getApplication().getApplicationContext(),
-                    R.string.no_more_drivers, Toast.LENGTH_SHORT).show();
+    private Runnable setParamsAfterQueryDone(final boolean val) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                setQueryDone(val);
+            }
         };
     }
 
-    private Runnable setParamsAfterQueryDone() {
-        return () -> {
-            mQueryDone.setValue(true);
-            //mShowProgress.setValue(false);
-        };
-    }
-
-    private Runnable setQueryDone(boolean val) {
-        return () -> {
-            mQueryDone.setValue(val);
-            //mShowProgress.setValue(false);
-        };
+    private void setQueryDone(final boolean val) {
+        mQueryDone.setValue(val);
+        mShowProgress.setValue(!val);
     }
 
     @NonNull
     private Runnable setDrivers(final List<Driver> list) {
-        return () -> mDrivers.setValue(list);
+        return new Runnable() {
+            @Override
+            public void run() {
+                mDrivers.setValue(list);
+
+                setQueryDone(true);
+            }
+        };
     }
 
     @Override
     public void doOnError() {
         // TODO: Show some error
-        mExecutors.mainThread().execute(setParamsAfterQueryDone());
+        mExecutors.mainThread().execute(setParamsAfterQueryDone(true));
     }
 
     @Override

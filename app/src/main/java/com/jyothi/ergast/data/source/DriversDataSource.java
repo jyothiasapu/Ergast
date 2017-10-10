@@ -22,15 +22,6 @@ import com.jyothi.ergast.data.Driver;
 
 import java.util.List;
 
-/**
- * Main entry point for accessing drivers data.
- * <p>
- * For simplicity, only getDrivers() and getDriver() have callbacks. Consider adding callbacks to other
- * methods to inform the user of network/database errors or successful operations.
- * <p>
- * For example, when a new driver is created, it's synchronously stored in cache but usually every
- * operation on database or network should be executed in a different thread.
- */
 public interface DriversDataSource {
 
     interface LoadDriversCallback {

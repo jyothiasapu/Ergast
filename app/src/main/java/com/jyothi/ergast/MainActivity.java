@@ -3,20 +3,25 @@ package com.jyothi.ergast;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.LifecycleActivity;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -34,7 +39,7 @@ import java.util.List;
  * Created by Jyothi on 7/22/16.
  */
 
-public class MainActivity extends LifecycleActivity implements SearchView.OnQueryTextListener {
+public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     private static final String TAG = "MainActivity";
 
@@ -48,20 +53,16 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
     private ItemAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     private List<Driver> mFilterDrivers = null;
+
     private MainViewModel mViewModel;
-    private ProgressDialog mProgressDialog;
+
+    private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setActionBar(toolbar);
-
-        getActionBar().setDisplayShowHomeEnabled(true);
-        getActionBar().setTitle(R.string.app_name);
 
         mLayoutManager = new LinearLayoutManager(this);
         // Initialize recycler view
@@ -73,6 +74,8 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnScrollListener(mScrollListener);
         mRecyclerView.setVisibility(View.VISIBLE);
+
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         // Checking if necessary permission are given by user or not
         checkPermissions();
@@ -98,29 +101,42 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
 
     private void createViewModel() {
         mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        mViewModel.getDrivers().observe(this, drivers -> {
-            if (drivers != null) {
-                mAdapter.setItems(drivers);
-            } else {
-                mAdapter.clearItems();
-            }
 
-            stopProgressDialog();
-        });
+        mViewModel.getDrivers().observe(this, new Observer<List<Driver>>() {
+            @Override
+            public void onChanged(@Nullable List<Driver> drivers) {
+                if (drivers != null) {
+                    mAdapter.setItems(drivers);
+                } else {
+                    mAdapter.clearItems();
+                }
 
-        mViewModel.getQueryDone().observe(this, queryDone -> {
-            mLoading = queryDone;
-        });
-
-        mViewModel.getEndOfDrivers().observe(this, endOfDrivers -> {
-            mEndOfDrivers = endOfDrivers;
-        });
-
-        mViewModel.getShowProgress().observe(this, showProgress -> {
-            if (showProgress) {
-                startProgressDialog();
-            } else {
                 stopProgressDialog();
+            }
+        });
+
+        mViewModel.getQueryDone().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean queryDone) {
+                mLoading = queryDone;
+            }
+        });
+
+        mViewModel.getEndOfDrivers().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean endOfDrivers) {
+                mEndOfDrivers = endOfDrivers;
+            }
+        });
+
+        mViewModel.getShowProgress().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean showProgress) {
+                if (showProgress) {
+                    startProgressDialog();
+                } else {
+                    stopProgressDialog();
+                }
             }
         });
     }
@@ -154,36 +170,15 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
         }
     }
 
-    public boolean isWifiEnabled() {
-        WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        return wifi.isWifiEnabled();
-    }
-
-    public Boolean isMobileDataEnabled() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return (Settings.Global.getInt(getContentResolver(), "mobile_data", 0) == 1);
-        } else {
-            // TODO: fix this
-        }
-
-        return false;
-    }
-
-    private Boolean oldGetMobileData() {
-        Object connectivityService = getSystemService(CONNECTIVITY_SERVICE);
-        ConnectivityManager cm = (ConnectivityManager) connectivityService;
-        try {
-            Class<?> c = Class.forName(cm.getClass().getName());
-            Method m = c.getDeclaredMethod("getMobileDataEnabled");
-            m.setAccessible(true);
-            return (Boolean) m.invoke(cm);
-        } catch (Exception e) {
-            return false;
-        }
+    public boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getApplication().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public void getNextPageItems() {
-        if (!isWifiEnabled() && !isMobileDataEnabled()) {
+        if (!isNetworkAvailable()) {
             Toast.makeText(this, R.string.wifi_or_data_not_enabled, Toast.LENGTH_SHORT).show();
             mLoading = true;
             return;
@@ -199,7 +194,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         final MenuItem searchItem = menu.findItem(R.id.action_search);
-        SearchView searchView = new SearchView((getActionBar().getThemedContext()));
+        SearchView searchView = new SearchView((getSupportActionBar().getThemedContext()));
         searchItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         searchItem.setActionView(searchView);
 
@@ -216,7 +211,7 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
             case R.id.refresh:
                 mViewModel.refresh();
                 mAdapter.clearItems();
-                mViewModel.loadDrivers(false, true);
+                mViewModel.loadDrivers();
                 break;
         }
 
@@ -281,26 +276,15 @@ public class MainActivity extends LifecycleActivity implements SearchView.OnQuer
     }
 
     public void startProgressDialog() {
-        if (mProgressDialog != null) {
-            mProgressDialog.cancel();
-            mProgressDialog = null;
-        }
-
-        mProgressDialog = mProgressDialog.show(this, getString(R.string.progress_title),
-                getString(R.string.progress_message), false, true);
+        mProgressBar.setVisibility(View.VISIBLE);
     }
 
     public void stopProgressDialog() {
-        if (mProgressDialog != null) {
-            mProgressDialog.cancel();
-            mProgressDialog = null;
-        }
+        mProgressBar.setVisibility(View.GONE);
     }
 
     @Override
     protected void onDestroy() {
-        stopProgressDialog();
-
         super.onDestroy();
     }
 }

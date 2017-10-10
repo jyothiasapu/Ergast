@@ -25,49 +25,21 @@ import com.jyothi.ergast.data.Driver;
 
 import java.util.List;
 
-/**
- * Data Access Object for the tasks table.
- */
 @Dao
 public interface DriversDao {
 
-    /**
-     * Select all drivers from the drivers table.
-     *
-     * @return all drivers.
-     */
     @Query("SELECT * FROM Drivers")
     List<Driver> getDrivers();
 
-    /**
-     * Select all drivers from the drivers table.
-     *
-     * @return all drivers.
-     */
     @Query("SELECT * FROM Drivers WHERE page = :p")
     List<Driver> getDrivers(int p);
 
-
-    /**
-     * Select a task by id.
-     *
-     * @param id the task id.
-     * @return the task with taskId.
-     */
     @Query("SELECT * FROM Drivers WHERE driver_id LIKE :id")
     List<Driver> getDriverById(String id);
 
-    /**
-     * Insert a task in the database. If the task already exists, replace it.
-     *
-     * @param task the task to be inserted.
-     */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertDriver(Driver task);
 
-    /**
-     * Delete all tasks.
-     */
     @Query("DELETE FROM Drivers")
     void deleteDrivers();
 

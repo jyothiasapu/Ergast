@@ -1,6 +1,7 @@
 package com.jyothi.ergast;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.widget.Filter;
 
@@ -66,6 +67,11 @@ public class DriverFilter extends Filter implements Destroy {
     }
 
     private List<Driver> filterListBeforeN(String newText) {
+        return filter(newText);
+    }
+
+    @NonNull
+    private List<Driver> filter(String newText) {
         List<Driver> filteredList = new ArrayList<Driver>();
 
         newText = newText.toLowerCase();
@@ -81,8 +87,10 @@ public class DriverFilter extends Filter implements Destroy {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private List<Driver> filterList(String newText) {
-        return mDrivers.stream()
-                .filter(p -> p.getDriverId().startsWith(newText)).collect(Collectors.toList());
+        //return mDrivers.stream()
+        //        .filter(p -> p.getDriverId().startsWith(newText)).collect(Collectors.toList());
+
+        return filter(newText);
     }
 
     @Override

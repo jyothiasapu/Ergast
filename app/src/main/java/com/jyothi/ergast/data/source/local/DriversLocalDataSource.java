@@ -86,7 +86,7 @@ public class DriversLocalDataSource implements DriversDataSource, Destroy {
     }
 
     @Override
-    public void getDrivers(@NonNull int page, @NonNull LoadDriversCallback callback) {
+    public void getDrivers(@NonNull final int page, @NonNull final LoadDriversCallback callback) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -96,7 +96,7 @@ public class DriversLocalDataSource implements DriversDataSource, Destroy {
                     @Override
                     public void run() {
                         if (drivers.isEmpty()) {
-                            // This will be called if the table is new or just empty.
+                            // This will be called if the ta ble is new or just empty.
                             callback.onDataNotAvailable();
                         } else {
                             callback.onDriversLoaded(drivers);

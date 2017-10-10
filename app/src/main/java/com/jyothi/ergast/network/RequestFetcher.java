@@ -48,40 +48,16 @@ public class RequestFetcher implements Destroy {
         return sb.toString();
     }
 
-    /**
-     * Creates network request.
-     *
-     * @return StringRequest
-     */
-    public StringRequest getRequest(int page) {
-        StringRequest sr = new StringRequest(Request.Method.GET,
-                createUrl(page),
-
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        mExecutors.networkIO().execute(parseResponse(response));
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        mCallback.doOnError();
-                    }
-                });
-
-        sr.setShouldCache(true);
-
-        return sr;
-    }
-
     private Runnable parseResponse(final String response) {
-        return () -> {
-            try {
-                Parser p = new Parser(response);
-                mCallback.doOnQueryDone(p.parse());
-            } catch (JSONException e) {
-                e.printStackTrace();
+        return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Parser p = new Parser(response);
+                    mCallback.doOnQueryDone(p.parse());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -97,6 +73,10 @@ public class RequestFetcher implements Destroy {
 
                     @Override
                     public void onResponse(JSONObject response) {
+                        if (mExecutors == null) {
+                            return;
+                        }
+
                         mExecutors.networkIO().execute(parseResponse(response.toString()));
                     }
                 }, new Response.ErrorListener() {
