@@ -23,8 +23,6 @@ import com.jyothi.ergast.interfaces.Destroy;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 
 public class DriversRepository implements DriversDataSource, Destroy {
 
@@ -34,7 +32,7 @@ public class DriversRepository implements DriversDataSource, Destroy {
 
     // Prevent direct instantiation.
     private DriversRepository(@NonNull DriversDataSource tasksLocalDataSource) {
-        mDriversLocalDataSource = checkNotNull(tasksLocalDataSource);
+        mDriversLocalDataSource = tasksLocalDataSource;
     }
 
 
@@ -52,7 +50,9 @@ public class DriversRepository implements DriversDataSource, Destroy {
 
     @Override
     public void getDrivers(@NonNull final LoadDriversCallback callback) {
-        checkNotNull(callback);
+        if (callback == null) {
+            return;
+        }
 
         // Query the local storage if available. If not, query the network.
         mDriversLocalDataSource.getDrivers(new LoadDriversCallback() {
@@ -88,14 +88,20 @@ public class DriversRepository implements DriversDataSource, Destroy {
 
     @Override
     public void saveDriver(@NonNull Driver driver) {
-        checkNotNull(driver);
+        if (driver == null) {
+            return;
+        }
         mDriversLocalDataSource.saveDriver(driver);
     }
 
     @Override
     public void getDriver(@NonNull final String driverId, @NonNull final GetDriverCallback callback) {
-        checkNotNull(driverId);
-        checkNotNull(callback);
+        if (driverId == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
 
         // Is the task in the local data source? If not, query the network.
         mDriversLocalDataSource.getDriver(driverId, new GetDriverCallback() {

@@ -33,7 +33,6 @@ import com.jyothi.ergast.data.source.local.ErgastDatabase;
 
 import java.util.ArrayList;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This provides methods to help Activities load their UI.
@@ -46,15 +45,24 @@ public class ActivityUtils {
      */
     public static void addFragmentToActivity(@NonNull FragmentManager fragmentManager,
                                              @NonNull Fragment fragment, int frameId) {
-        checkNotNull(fragmentManager);
-        checkNotNull(fragment);
+        if (fragment == null) {
+            return;
+        }
+
+        if (fragmentManager == null) {
+            return;
+        }
+
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(frameId, fragment);
         transaction.commit();
     }
 
-    public static DriversRepository provideTasksRepository(@NonNull Context context, AppExecutors executors) {
-        checkNotNull(context);
+    public static DriversRepository provideErgastRepository(@NonNull Context context, AppExecutors executors) {
+        if (context == null) {
+            return null;
+        }
+
         ErgastDatabase database = ErgastDatabase.getInstance(context);
         return DriversRepository.getInstance(DriversLocalDataSource.getInstance(executors,
                 database.driverDao()));

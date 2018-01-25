@@ -1,19 +1,3 @@
-/*
- * Copyright 2016, The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.jyothi.ergast.data;
 
 import android.arch.persistence.room.ColumnInfo;
@@ -23,15 +7,16 @@ import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.common.base.Objects;
+import com.jyothi.ergast.model.BaseObject;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
  * Model class for a Driver.
  */
 @Entity(tableName = "drivers")
-public final class Driver {
+public final class Driver extends BaseObject {
 
     @PrimaryKey
     @NonNull
@@ -188,19 +173,19 @@ public final class Driver {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Driver driver = (Driver) o;
-        return Objects.equal(id, driver.id) &&
-                Objects.equal(driverId, driver.driverId) &&
-                Objects.equal(url, driver.url) &&
-                Objects.equal(givenName, driver.givenName) &&
-                Objects.equal(familyName, driver.familyName) &&
-                Objects.equal(driverId, driver.driverId) &&
-                Objects.equal(nationality, driver.nationality) &&
-                Objects.equal(page, driver.page);
+        return Objects.equals(id, driver.id) &&
+                Objects.equals(driverId, driver.driverId) &&
+                Objects.equals(url, driver.url) &&
+                Objects.equals(givenName, driver.givenName) &&
+                Objects.equals(familyName, driver.familyName) &&
+                Objects.equals(driverId, driver.driverId) &&
+                Objects.equals(nationality, driver.nationality) &&
+                Objects.equals(page, driver.page);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, driverId, url, givenName, familyName, dob, nationality, page);
+        return Objects.hash(id, driverId, url, givenName, familyName, dob, nationality, page);
     }
 
     @Override

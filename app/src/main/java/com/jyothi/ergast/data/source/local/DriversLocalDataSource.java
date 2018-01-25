@@ -26,8 +26,6 @@ import com.jyothi.ergast.util.AppExecutors;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Concrete implementation of a data source as a db.
  */
@@ -139,7 +137,9 @@ public class DriversLocalDataSource implements DriversDataSource, Destroy {
 
     @Override
     public void saveDriver(@NonNull final Driver task) {
-        checkNotNull(task);
+        if (task == null) {
+            return;
+        }
         Runnable saveRunnable = new Runnable() {
             @Override
             public void run() {

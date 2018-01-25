@@ -6,23 +6,14 @@ package com.jyothi.ergast.model;
 
 public class ItemResponse {
 
-    private MRData mRData;
+    private MRData MRData;
 
     public ItemResponse(MRData data) {
-        this.mRData = data;
+        this.MRData = data;
     }
 
     public MRData getMRData() {
-        return mRData;
+        return MRData;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\"mRData\":{");
-        sb.append(mRData.toString());
-        sb.append("}}");
-
-        return sb.toString();
-    }
 }

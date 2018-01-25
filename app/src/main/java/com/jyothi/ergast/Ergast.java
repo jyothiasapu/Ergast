@@ -2,7 +2,6 @@ package com.jyothi.ergast;
 
 import android.app.Application;
 
-import com.jyothi.ergast.network.NetworkQueue;
 import com.jyothi.ergast.util.ActivityUtils;
 import com.jyothi.ergast.util.AppExecutors;
 
@@ -19,8 +18,7 @@ public class Ergast extends Application {
 
         mExecutors = new AppExecutors();
 
-        NetworkQueue.getInstance(this);
-        ActivityUtils.provideTasksRepository(this, mExecutors);
+        ActivityUtils.provideErgastRepository(this, mExecutors);
     }
 
     public AppExecutors getExecutors() {

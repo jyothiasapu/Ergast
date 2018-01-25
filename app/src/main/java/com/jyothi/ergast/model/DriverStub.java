@@ -47,16 +47,4 @@ public class DriverStub {
         return nationality;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\"driverId\":\"" + driverId + "\",");
-        sb.append("\"url\":\"" + url + "\",");
-        sb.append("\"givenName\":\"" + givenName + "\",");
-        sb.append("\"familyName\":\"" + familyName + "\",");
-        sb.append("\"dateOfBirth\":\"" + dateOfBirth + "\",");
-        sb.append("\"nationality\":\"" + nationality + "\"}");
-
-        return sb.toString();
-    }
 }

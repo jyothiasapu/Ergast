@@ -1,18 +1,13 @@
 package com.jyothi.ergast;
 
 import android.Manifest;
-import android.app.ProgressDialog;
-import android.arch.lifecycle.LifecycleActivity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,14 +19,11 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.jyothi.ergast.data.Driver;
-import com.jyothi.ergast.model.MainViewModel;
 import com.jyothi.ergast.util.ActivityUtils;
 import com.jyothi.ergast.util.Utils;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 

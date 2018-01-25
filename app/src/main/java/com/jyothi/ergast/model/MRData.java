@@ -12,7 +12,7 @@ public class MRData {
     private String limit;
     private String offset;
     private String total;
-    private DriverTable driverTable;
+    private DriverTable DriverTable;
 
     public MRData(String xmlns, String series, String url, String limit,
                   String offset, String total, DriverTable table) {
@@ -22,7 +22,7 @@ public class MRData {
         this.limit = limit;
         this.offset = offset;
         this.total = total;
-        this.driverTable = table;
+        this.DriverTable = table;
     }
 
     public String getXmlns() {
@@ -50,21 +50,7 @@ public class MRData {
     }
 
     public DriverTable getDriverTable() {
-        return driverTable;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\"xmlns\":\"" + xmlns + "\",");
-        sb.append("\"series\":\"" + series + "\",");
-        sb.append("\"url\":\"" + url + "\",");
-        sb.append("\"limit\":\"" + limit + "\",");
-        sb.append("\"offset\":\"" + offset + "\",");
-        sb.append("\"total\":\"" + total + "\",");
-        sb.append("\"driverTable\":{" + driverTable.toString() + "}");
-
-        return sb.toString();
+        return DriverTable;
     }
 
 }

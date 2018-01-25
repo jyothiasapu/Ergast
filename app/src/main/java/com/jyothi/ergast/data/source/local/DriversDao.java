@@ -16,6 +16,7 @@
 
 package com.jyothi.ergast.data.source.local;
 
+import android.arch.paging.DataSource;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
@@ -42,5 +43,8 @@ public interface DriversDao {
 
     @Query("DELETE FROM Drivers")
     void deleteDrivers();
+
+    //@Query("SELECT * FROM Drivers ORDER BY lastName ASC")
+    //public abstract DataSource.Factory<Integer, Driver> getDriversByPage();
 
 }

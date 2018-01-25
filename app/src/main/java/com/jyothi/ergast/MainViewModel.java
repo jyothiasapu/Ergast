@@ -1,22 +1,24 @@
-package com.jyothi.ergast.model;
+package com.jyothi.ergast;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.Toast;
 
-import com.android.volley.toolbox.JsonRequest;
-import com.jyothi.ergast.Ergast;
-import com.jyothi.ergast.R;
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.data.source.DriversDataSource;
 import com.jyothi.ergast.data.source.DriversRepository;
 import com.jyothi.ergast.interfaces.MainViewInterface;
 import com.jyothi.ergast.interfaces.NetworkCallback;
-import com.jyothi.ergast.network.NetworkQueue;
-import com.jyothi.ergast.network.RequestFetcher;
+import com.jyothi.ergast.model.DriverStub;
+import com.jyothi.ergast.model.DriverTable;
+import com.jyothi.ergast.model.ItemResponse;
+import com.jyothi.ergast.model.MRData;
+import com.jyothi.ergast.network.ApiService;
+import com.jyothi.ergast.network.RetroClient;
 import com.jyothi.ergast.util.ActivityUtils;
 import com.jyothi.ergast.util.AppExecutors;
 import com.jyothi.ergast.util.Utils;
@@ -24,7 +26,10 @@ import com.jyothi.ergast.util.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 /**
  * Created by Jyothi on 7/22/2017.
@@ -42,23 +47,16 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     private MutableLiveData<List<Driver>> mDrivers;
     private MutableLiveData<Boolean> mQueryDone;
     private MutableLiveData<Boolean> mShowProgress;
-    private RequestFetcher mRequestFetcher;
-    private NetworkQueue mNetworkQueue;
 
     public MainViewModel(Application app) {
         super(app);
 
-        //mPage = Utils.readPagePref(app.getApplicationContext(), mPage);
         mEndOfDrivers = new MutableLiveData<Boolean>();
-        mEndOfDrivers.setValue(Utils.readEndOfDriversPref(app.getApplicationContext()));
+        mEndOfDrivers.setValue(false);
 
         mExecutors = ((Ergast) app).getExecutors();
-        mRepository = ActivityUtils.provideTasksRepository(app.getApplicationContext(),
+        mRepository = ActivityUtils.provideErgastRepository(app.getApplicationContext(),
                 mExecutors);
-        checkNotNull(mRepository, "tasksRepository cannot be null");
-
-        mRequestFetcher = new RequestFetcher(this, mExecutors);
-        mNetworkQueue = NetworkQueue.getInstance(app.getApplicationContext());
 
         mQueryDone = new MutableLiveData<Boolean>();
         mQueryDone.setValue(true);
@@ -74,7 +72,6 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
             @Override
             public void onDriversLoaded(List<Driver> drivers) {
-
                 if (drivers == null || drivers.size() == 0) {
                     fetchDrivers();
                     return;
@@ -131,7 +128,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     @Override
     public void refresh() {
         mPage = 0;
-        // Utils.writePagePref(getApplication().getApplicationContext(), 0);
+
         Utils.writeEndOfDriversPref(getApplication().getApplicationContext(), false);
         setEndOfDrivers(false);
 
@@ -177,23 +174,41 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     }
 
     private void fetchDrivers() {
-        setQueryDone(false);
+        ApiService api = RetroClient.getApiService();
 
-        Runnable runnable = new Runnable() {
+        Call<ItemResponse> call = api.getDrivers(mPage * Utils.ITEMS_PER_PAGE_CONSTANT);
+        call.enqueue(new Callback<ItemResponse>() {
+
             @Override
-            public void run() {
-                JsonRequest req = mRequestFetcher.getJsonRequest(mPage);
-                mNetworkQueue.addToRequestQueue(req);
-            }
-        };
+            public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
+                if (!response.isSuccessful()) {
+                    return;
+                }
 
-        mExecutors.networkIO().execute(runnable);
+                doOnQueryDone(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ItemResponse> call, Throwable t) {
+                Log.i(TAG, "Response : " + call.toString());
+            }
+        });
     }
 
     @Override
     public void doOnQueryDone(ItemResponse response) {
         if (response == null) {
             mExecutors.mainThread().execute(setParamsAfterQueryDone(true));
+            return;
+        }
+
+        MRData mrData = response.getMRData();
+        if (mrData == null) {
+            return;
+        }
+
+        DriverTable dt = mrData.getDriverTable();
+        if (dt == null) {
             return;
         }
 
@@ -204,7 +219,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
         int page = (Integer.parseInt(response.getMRData().getOffset()) / 10);
 
-        List<DriverStub> drivers = response.getMRData().getDriverTable().getDrivers();
+        List<DriverStub> drivers = dt.getDrivers();
         if ((drivers != null) && (drivers.size() > 0)) {
             for (DriverStub ds : drivers) {
                 Driver d = new Driver(ds.getDriverId(), ds.getUrl(), ds.getGivenName(),
@@ -216,7 +231,6 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
 
             // Page maintenance
             mPage++;
-            // Utils.writePagePref(getApplication().getApplicationContext(), mPage);
 
             if (list.size() < (Utils.MIN_PAGES_CONSTANT * Utils.ITEMS_PER_PAGE_CONSTANT)) {
                 loadNextSetUsers();
@@ -226,7 +240,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
         } else {
             if (Integer.parseInt(response.getMRData().getOffset()) >=
                     Integer.parseInt(response.getMRData().getTotal())) {
-                Utils.writeEndOfDriversPref(getApplication().getApplicationContext(), true);
+                //Utils.writeEndOfDriversPref(getApplication().getApplicationContext(), true);
 
                 mExecutors.mainThread().execute(setEndOfDrivers(true));
             } else {
@@ -286,17 +300,11 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     protected void onCleared() {
         super.onCleared();
 
-        if (mRequestFetcher != null) {
-            mRequestFetcher.tearDown();
-            mRequestFetcher = null;
-        }
-
         if (mDrivers != null) {
             mDrivers.setValue(null);
             mDrivers = null;
         }
 
-        mNetworkQueue = null;
         mRepository = null;
         mExecutors = null;
     }
