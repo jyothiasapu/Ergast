@@ -39,35 +39,6 @@ import java.util.ArrayList;
  */
 public class ActivityUtils {
 
-    /**
-     * The {@code fragment} is added to the container view with id {@code frameId}. The operation is
-     * performed by the {@code fragmentManager}.
-     */
-    public static void addFragmentToActivity(@NonNull FragmentManager fragmentManager,
-                                             @NonNull Fragment fragment, int frameId) {
-        if (fragment == null) {
-            return;
-        }
-
-        if (fragmentManager == null) {
-            return;
-        }
-
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(frameId, fragment);
-        transaction.commit();
-    }
-
-    public static DriversRepository provideErgastRepository(@NonNull Context context, AppExecutors executors) {
-        if (context == null) {
-            return null;
-        }
-
-        ErgastDatabase database = ErgastDatabase.getInstance(context);
-        return DriversRepository.getInstance(DriversLocalDataSource.getInstance(executors,
-                database.driverDao()));
-    }
-
     public static boolean requestPermissions(Context ctx, int returnCode, ArrayList<String> perms) {
         if (perms.size() == 0) {
             return true;

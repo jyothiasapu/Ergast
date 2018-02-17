@@ -18,18 +18,17 @@ import com.jyothi.ergast.model.DriverTable;
 import com.jyothi.ergast.model.ItemResponse;
 import com.jyothi.ergast.model.MRData;
 import com.jyothi.ergast.network.ApiService;
-import com.jyothi.ergast.network.RetroClient;
-import com.jyothi.ergast.util.ActivityUtils;
 import com.jyothi.ergast.util.AppExecutors;
 import com.jyothi.ergast.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
 
 /**
  * Created by Jyothi on 7/22/2017.
@@ -42,21 +41,29 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     private volatile int mPage = 0;
     private volatile MutableLiveData<Boolean> mEndOfDrivers;
 
-    private AppExecutors mExecutors;
-    private DriversRepository mRepository;
     private MutableLiveData<List<Driver>> mDrivers;
     private MutableLiveData<Boolean> mQueryDone;
     private MutableLiveData<Boolean> mShowProgress;
 
+    @Inject
+    public AppExecutors mExecutors;
+
+    @Inject
+    public DriversRepository mRepository;
+
+    @Inject
+    public ApiService mApiService;
+
     public MainViewModel(Application app) {
         super(app);
 
+        MainViewModelComponent component = DaggerMainViewModelComponent.builder()
+                .ergastComponent(Ergast.get(app).component())
+                .build();
+        component.inject(this);
+
         mEndOfDrivers = new MutableLiveData<Boolean>();
         mEndOfDrivers.setValue(false);
-
-        mExecutors = ((Ergast) app).getExecutors();
-        mRepository = ActivityUtils.provideErgastRepository(app.getApplicationContext(),
-                mExecutors);
 
         mQueryDone = new MutableLiveData<Boolean>();
         mQueryDone.setValue(true);
@@ -174,9 +181,7 @@ public class MainViewModel extends AndroidViewModel implements NetworkCallback, 
     }
 
     private void fetchDrivers() {
-        ApiService api = RetroClient.getApiService();
-
-        Call<ItemResponse> call = api.getDrivers(mPage * Utils.ITEMS_PER_PAGE_CONSTANT);
+        Call<ItemResponse> call = mApiService.getDrivers(mPage * Utils.ITEMS_PER_PAGE_CONSTANT);
         call.enqueue(new Callback<ItemResponse>() {
 
             @Override

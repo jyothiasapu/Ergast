@@ -27,24 +27,9 @@ import com.jyothi.ergast.data.Driver;
 /**
  * The Room Database that contains the Driver table.
  */
-@Database(entities = {Driver.class}, version = 1)
+@Database(entities = {Driver.class}, version = 1, exportSchema = false)
 public abstract class ErgastDatabase extends RoomDatabase {
 
-    private static ErgastDatabase INSTANCE;
-
     public abstract DriversDao driverDao();
-
-    private static final Object sLock = new Object();
-
-    public static ErgastDatabase getInstance(Context context) {
-        synchronized (sLock) {
-            if (INSTANCE == null) {
-                INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                        ErgastDatabase.class, "Ergast.db")
-                        .build();
-            }
-            return INSTANCE;
-        }
-    }
 
 }

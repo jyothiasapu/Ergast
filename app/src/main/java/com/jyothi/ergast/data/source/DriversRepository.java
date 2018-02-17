@@ -19,33 +19,20 @@ package com.jyothi.ergast.data.source;
 import android.support.annotation.NonNull;
 
 import com.jyothi.ergast.data.Driver;
+import com.jyothi.ergast.data.source.local.DriversLocalDataSource;
 import com.jyothi.ergast.interfaces.Destroy;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 
 public class DriversRepository implements DriversDataSource, Destroy {
 
-    private static DriversRepository INSTANCE = null;
+    private DriversDataSource mDriversLocalDataSource;
 
-    private final DriversDataSource mDriversLocalDataSource;
-
-    // Prevent direct instantiation.
-    private DriversRepository(@NonNull DriversDataSource tasksLocalDataSource) {
-        mDriversLocalDataSource = tasksLocalDataSource;
-    }
-
-
-    public static DriversRepository getInstance(DriversDataSource tasksLocalDataSource) {
-        if (INSTANCE == null) {
-            INSTANCE = new DriversRepository(tasksLocalDataSource);
-        }
-
-        return INSTANCE;
-    }
-
-    public static void destroyInstance() {
-        INSTANCE = null;
+    public DriversRepository(DriversLocalDataSource source) {
+        mDriversLocalDataSource = source;
     }
 
     @Override

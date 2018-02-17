@@ -31,29 +31,13 @@ import java.util.List;
  */
 public class DriversLocalDataSource implements DriversDataSource, Destroy {
 
-    private static volatile DriversLocalDataSource INSTANCE;
-
     private DriversDao mDriversDao;
 
     private AppExecutors mAppExecutors;
 
-    // Prevent direct instantiation.
-    private DriversLocalDataSource(@NonNull AppExecutors appExecutors,
-                                   @NonNull DriversDao tasksDao) {
-        mAppExecutors = appExecutors;
-        mDriversDao = tasksDao;
-    }
-
-    public static DriversLocalDataSource getInstance(@NonNull AppExecutors appExecutors,
-                                                     @NonNull DriversDao tasksDao) {
-        if (INSTANCE == null) {
-            synchronized (DriversLocalDataSource.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new DriversLocalDataSource(appExecutors, tasksDao);
-                }
-            }
-        }
-        return INSTANCE;
+    public DriversLocalDataSource(DriversDao dao, AppExecutors exe) {
+        mDriversDao = dao;
+        mAppExecutors = exe;
     }
 
     /**
@@ -167,13 +151,8 @@ public class DriversLocalDataSource implements DriversDataSource, Destroy {
         mAppExecutors.diskIO().execute(deleteRunnable);
     }
 
-    @VisibleForTesting
-    static void clearInstance() {
-        INSTANCE = null;
-    }
-
     @Override
     public void tearDown() {
-        INSTANCE = null;
+
     }
 }

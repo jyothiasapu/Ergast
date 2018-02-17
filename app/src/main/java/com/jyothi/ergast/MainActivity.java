@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.databinding.DataBindingUtil;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -16,16 +17,19 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.jyothi.ergast.data.Driver;
+import com.jyothi.ergast.databinding.ActivityMainBinding;
+import com.jyothi.ergast.di.MainActivityModule;
 import com.jyothi.ergast.util.ActivityUtils;
 import com.jyothi.ergast.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Created by Jyothi on 7/22/16.
@@ -42,42 +46,43 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private boolean mSearchIsOn = false;
     private boolean mEndOfDrivers = false;
 
-    private ItemAdapter mAdapter;
-    private LinearLayoutManager mLayoutManager;
-    private List<Driver> mFilterDrivers = null;
+    @Inject
+    public ItemAdapter mAdapter;
+
+    @Inject
+    public LinearLayoutManager mLayoutManager;
+
+    private ActivityMainBinding mBinding;
 
     private MainViewModel mViewModel;
 
-    private ProgressBar mProgressBar;
-    private RecyclerView mRecyclerView;
+    private MainActivityComponent mComponent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_info);
 
-        mLayoutManager = new LinearLayoutManager(this);
-        // Initialize recycler view
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        //Creating the adapter to show the items.
-        mAdapter = new ItemAdapter(new ArrayList<Driver>());
+        mComponent = DaggerMainActivityComponent.builder()
+                .mainActivityModule(new MainActivityModule(this))
+                .build();
+        mComponent.inject(this);
 
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addOnScrollListener(mScrollListener);
-        mRecyclerView.setVisibility(View.VISIBLE);
-
-        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        initializeViewModel();
+        initDataBinding();
 
         // Checking if necessary permission are given by user or not
         checkPermissions();
     }
 
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
+    private void initDataBinding() {
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        mViewModel.getDrivers();
+        mBinding.included.recyclerView.setLayoutManager(mLayoutManager);
+        mBinding.included.recyclerView.setAdapter(mAdapter);
+        mBinding.included.recyclerView.addOnScrollListener(mScrollListener);
+        mBinding.included.recyclerView.setVisibility(View.VISIBLE);
+
+        mBinding.setModel(mViewModel);
     }
 
     private void checkPermissions() {
@@ -87,11 +92,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             Log.i(TAG, "Permissions are there querying");
             //Showing progress dialog
             startProgressDialog();
-            createViewModel();
+            initializeViewModel();
         }
     }
 
-    private void createViewModel() {
+    private void initializeViewModel() {
         mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
         mViewModel.getDrivers().observe(this, new Observer<List<Driver>>() {
@@ -257,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 }
 
                 if (grant) {
-                    createViewModel();
+                    initializeViewModel();
                 } else {
                     finish();
                 }
@@ -268,11 +273,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     public void startProgressDialog() {
-        mProgressBar.setVisibility(View.VISIBLE);
+        mBinding.included.progressBar.setVisibility(View.VISIBLE);
     }
 
     public void stopProgressDialog() {
-        mProgressBar.setVisibility(View.GONE);
+        mBinding.included.progressBar.setVisibility(View.GONE);
     }
 
     @Override
