@@ -1,5 +1,6 @@
 package com.jyothi.ergast;
 
+import android.arch.paging.PagedList;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -11,7 +12,6 @@ import com.jyothi.ergast.interfaces.ItemAdapterInterface;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Jyothi on 2/8/17.
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 
 public class DriverFilter extends Filter implements Destroy {
 
-    private List<Driver> mDrivers;
+    private PagedList<Driver> mDrivers;
     private ItemAdapterInterface mListener;
     private boolean mMarkToDestroy = false;
 
     private CharSequence mPrevStr = "";
 
-    public DriverFilter(List<Driver> drivers, ItemAdapterInterface l) {
+    public DriverFilter(PagedList<Driver> drivers, ItemAdapterInterface l) {
         mDrivers = drivers;
 
         mListener = l;

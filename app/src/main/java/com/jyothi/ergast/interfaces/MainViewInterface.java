@@ -1,10 +1,10 @@
 package com.jyothi.ergast.interfaces;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.paging.PagedList;
+import android.support.v7.app.AppCompatActivity;
 
 import com.jyothi.ergast.data.Driver;
-
-import java.util.List;
 
 /**
  * Created by Jyothi on 7/23/2017.
@@ -12,17 +12,9 @@ import java.util.List;
 
 public interface MainViewInterface {
 
-    public void getDriverWithDriverId(String driverId);
+    public LiveData<PagedList<Driver>> getDrivers();
 
-    public void loadNextSetUsers();
-
-    public LiveData<List<Driver>> getDrivers();
-
-    public LiveData<Boolean> getShowProgress();
-
-    public LiveData<Boolean> getQueryDone();
-
-    public LiveData<Boolean> getEndOfDrivers();
+    public void removeDriversObserver(AppCompatActivity act);
 
     public void refresh();
 }

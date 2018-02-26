@@ -16,6 +16,8 @@
 
 package com.jyothi.ergast.data.source;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.paging.PagedList;
 import android.support.annotation.NonNull;
 
 import com.jyothi.ergast.data.Driver;
@@ -31,18 +33,11 @@ public interface DriversDataSource {
         void onDataNotAvailable();
     }
 
-    interface GetDriverCallback {
-
-        void onDriverLoaded(List<Driver> driver);
-
-        void onDataNotAvailable();
-    }
-
     void getDrivers(@NonNull LoadDriversCallback callback);
 
     void getDrivers(@NonNull int page, @NonNull LoadDriversCallback callback);
 
-    void getDriver(@NonNull String id, @NonNull GetDriverCallback callback);
+    LiveData<PagedList<Driver>> getDrivers(@NonNull String id);
 
     void saveDriver(@NonNull Driver driver);
 

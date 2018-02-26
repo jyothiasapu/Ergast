@@ -3,26 +3,27 @@ package com.jyothi.ergast;
 import android.app.Activity;
 import android.app.Application;
 
-import com.jyothi.ergast.di.ContextModule;
+import javax.inject.Inject;
+
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasActivityInjector;
 
 /**
  * Created by Jyothi on 7/22/2017.
  */
-public class Ergast extends Application {
+public class Ergast extends Application implements HasActivityInjector {
 
-    private ErgastComponent mComponent;
+    @Inject
+    public DispatchingAndroidInjector<Activity> mActivityInjector;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        mComponent = DaggerErgastComponent.builder()
-                .contextModule(new ContextModule(this))
-                .build();
-    }
-
-    public ErgastComponent component() {
-        return mComponent;
+        DaggerErgastComponent.builder()
+                .application(this)
+                .build()
+                .inject(this);
     }
 
     public static Ergast get(Activity act) {
@@ -31,6 +32,11 @@ public class Ergast extends Application {
 
     public static Ergast get(Application app) {
         return (Ergast) app;
+    }
+
+    @Override
+    public DispatchingAndroidInjector<Activity> activityInjector() {
+        return mActivityInjector;
     }
 
 }

@@ -1,5 +1,6 @@
-package com.jyothi.ergast.di;
+package com.jyothi.ergast.di.module;
 
+import com.jyothi.ergast.di.ErgastScope;
 import com.jyothi.ergast.network.ApiService;
 
 import dagger.Module;
@@ -13,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 @Module(includes = NetworkModule.class)
-public class ErgastServiceModule {
+public class ApiServiceModule {
 
     @Provides
     @ErgastScope

@@ -35,16 +35,13 @@ public interface DriversDao {
     @Query("SELECT * FROM Drivers WHERE page = :p")
     List<Driver> getDrivers(int p);
 
-    @Query("SELECT * FROM Drivers WHERE driver_id LIKE :id")
-    List<Driver> getDriverById(String id);
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertDriver(Driver task);
 
     @Query("DELETE FROM Drivers")
     void deleteDrivers();
 
-    //@Query("SELECT * FROM Drivers ORDER BY lastName ASC")
-    //public abstract DataSource.Factory<Integer, Driver> getDriversByPage();
+    @Query("SELECT * FROM Drivers WHERE driver_id LIKE :id")
+    public abstract DataSource.Factory<Integer, Driver> getDrivers(String id);
 
 }

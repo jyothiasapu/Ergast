@@ -1,7 +1,11 @@
-package com.jyothi.ergast.di;
+package com.jyothi.ergast.di.module;
 
 import android.content.Context;
 import android.util.Log;
+
+import com.jyothi.ergast.di.ApplicationContext;
+import com.jyothi.ergast.di.ErgastScope;
+import com.jyothi.ergast.di.module.ContextModule;
 
 import java.io.File;
 
@@ -12,10 +16,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
- * Created by Jyothi on 16-02-2018.
+ * Created by Jyothi Asapu on 16-02-2018.
  */
 
-@Module
+@Module(includes = {ContextModule.class})
 public class NetworkModule {
 
     private static final String TAG = "NetworkModule";

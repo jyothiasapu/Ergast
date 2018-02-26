@@ -1,33 +1,31 @@
 package com.jyothi.ergast;
 
-import com.jyothi.ergast.data.source.DriversRepository;
-import com.jyothi.ergast.data.source.local.ErgastDatabase;
-import com.jyothi.ergast.di.ContextModule;
-import com.jyothi.ergast.di.DatabaseModule;
-import com.jyothi.ergast.di.ErgastScope;
-import com.jyothi.ergast.di.ErgastServiceModule;
-import com.jyothi.ergast.di.ExecutorModule;
-import com.jyothi.ergast.di.NetworkModule;
-import com.jyothi.ergast.network.ApiService;
-import com.jyothi.ergast.util.AppExecutors;
+import android.app.Application;
 
+import com.jyothi.ergast.di.ErgastScope;
+import com.jyothi.ergast.di.builder.ActivityBuilder;
+import com.jyothi.ergast.di.module.AppModule;
+
+import dagger.BindsInstance;
 import dagger.Component;
+import dagger.android.AndroidInjectionModule;
 
 /**
  * Created by Jyothi on 16-02-2018.
  */
 
 @ErgastScope
-@Component(modules = {ContextModule.class, DatabaseModule.class, ExecutorModule.class,
-        ErgastServiceModule.class, NetworkModule.class})
+@Component(modules = {AndroidInjectionModule.class, AppModule.class, ActivityBuilder.class})
 public interface ErgastComponent {
 
-    AppExecutors getAppExecutors();
+    void inject(Ergast app);
 
-    DriversRepository getDriversRepository();
+    @Component.Builder
+    interface Builder {
 
-    ApiService getApiService();
+        @BindsInstance
+        Builder application(Application application);
 
-    ErgastDatabase getDatabase();
-
+        ErgastComponent build();
+    }
 }

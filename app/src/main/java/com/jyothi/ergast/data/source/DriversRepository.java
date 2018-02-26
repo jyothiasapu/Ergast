@@ -16,6 +16,8 @@
 
 package com.jyothi.ergast.data.source;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.paging.PagedList;
 import android.support.annotation.NonNull;
 
 import com.jyothi.ergast.data.Driver;
@@ -23,8 +25,6 @@ import com.jyothi.ergast.data.source.local.DriversLocalDataSource;
 import com.jyothi.ergast.interfaces.Destroy;
 
 import java.util.List;
-
-import javax.inject.Inject;
 
 
 public class DriversRepository implements DriversDataSource, Destroy {
@@ -82,26 +82,13 @@ public class DriversRepository implements DriversDataSource, Destroy {
     }
 
     @Override
-    public void getDriver(@NonNull final String driverId, @NonNull final GetDriverCallback callback) {
+    public LiveData<PagedList<Driver>> getDrivers(@NonNull final String driverId) {
         if (driverId == null) {
-            return;
-        }
-        if (callback == null) {
-            return;
+            return null;
         }
 
         // Is the task in the local data source? If not, query the network.
-        mDriversLocalDataSource.getDriver(driverId, new GetDriverCallback() {
-            @Override
-            public void onDriverLoaded(List<Driver> driver) {
-                callback.onDriverLoaded(driver);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                callback.onDataNotAvailable();
-            }
-        });
+        return mDriversLocalDataSource.getDrivers(driverId);
     }
 
     @Override

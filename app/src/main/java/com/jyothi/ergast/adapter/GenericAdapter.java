@@ -9,7 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jyothi.ergast.BaseHolder;
+import com.jyothi.ergast.viewholder.BaseHolder;
 import com.jyothi.ergast.interfaces.BaseListener;
 import com.jyothi.ergast.interfaces.Destroy;
 import com.jyothi.ergast.model.BaseObject;

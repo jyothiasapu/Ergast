@@ -34,14 +34,14 @@ public class AppExecutors {
 
     private static final int THREAD_COUNT = 3;
 
-    private final Executor diskIO;
+    private final DiskIOThreadExecutor diskIO;
 
     private final Executor networkIO;
 
-    private final Executor mainThread;
+    private final MainThreadExecutor mainThread;
 
     @VisibleForTesting
-    AppExecutors(Executor diskIO, Executor networkIO, Executor mainThread) {
+    public AppExecutors(DiskIOThreadExecutor diskIO, Executor networkIO, MainThreadExecutor mainThread) {
         this.diskIO = diskIO;
         this.networkIO = networkIO;
         this.mainThread = mainThread;
@@ -52,7 +52,7 @@ public class AppExecutors {
                 new MainThreadExecutor());
     }
 
-    public Executor diskIO() {
+    public DiskIOThreadExecutor diskIO() {
         return diskIO;
     }
 
@@ -60,11 +60,11 @@ public class AppExecutors {
         return networkIO;
     }
 
-    public Executor mainThread() {
+    public MainThreadExecutor mainThread() {
         return mainThread;
     }
 
-    private static class MainThreadExecutor implements Executor {
+    public static class MainThreadExecutor implements Executor {
         private Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 
         @Override

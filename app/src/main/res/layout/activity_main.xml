@@ -8,7 +8,7 @@
 
         <variable
             name="model"
-            type="com.jyothi.ergast.MainViewModel" />
+            type="com.jyothi.ergast.viewmodel.MainViewModel" />
     </data>
 
     <android.support.design.widget.CoordinatorLayout

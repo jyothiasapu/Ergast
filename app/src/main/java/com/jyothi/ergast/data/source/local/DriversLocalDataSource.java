@@ -16,8 +16,10 @@
 
 package com.jyothi.ergast.data.source.local;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
 import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.data.source.DriversDataSource;
@@ -31,9 +33,8 @@ import java.util.List;
  */
 public class DriversLocalDataSource implements DriversDataSource, Destroy {
 
-    private DriversDao mDriversDao;
-
     private AppExecutors mAppExecutors;
+    private DriversDao mDriversDao;
 
     public DriversLocalDataSource(DriversDao dao, AppExecutors exe) {
         mDriversDao = dao;
@@ -93,30 +94,20 @@ public class DriversLocalDataSource implements DriversDataSource, Destroy {
     }
 
     /**
-     * Note: {@link GetDriverCallback#onDataNotAvailable()} is fired if the {@link Driver} isn't
+     * Note: {@link LoadDriversCallback#onDataNotAvailable()} is fired if the {@link Driver} isn't
      * found.
      */
     @Override
-    public void getDriver(@NonNull final String driverId, @NonNull final GetDriverCallback callback) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                final List<Driver> driver = mDriversDao.getDriverById(driverId);
+    public LiveData<PagedList<Driver>> getDrivers(@NonNull final String driverId) {
+        PagedList.Config config = (new PagedList.Config.Builder())
+                .setEnablePlaceholders(true)
+                .setPrefetchDistance(10)
+                .setPageSize(20)
+                .build();
 
-                mAppExecutors.mainThread().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (driver != null) {
-                            callback.onDriverLoaded(driver);
-                        } else {
-                            callback.onDataNotAvailable();
-                        }
-                    }
-                });
-            }
-        };
-
-        mAppExecutors.diskIO().execute(runnable);
+        return new LivePagedListBuilder<Integer, Driver>(mDriversDao.getDrivers(driverId), config)
+                .setBackgroundThreadExecutor(mAppExecutors.diskIO())
+                .build();
     }
 
     @Override
@@ -124,12 +115,14 @@ public class DriversLocalDataSource implements DriversDataSource, Destroy {
         if (task == null) {
             return;
         }
+
         Runnable saveRunnable = new Runnable() {
             @Override
             public void run() {
                 mDriversDao.insertDriver(task);
             }
         };
+
         mAppExecutors.diskIO().execute(saveRunnable);
     }
 

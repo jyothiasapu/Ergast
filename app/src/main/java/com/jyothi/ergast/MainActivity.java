@@ -2,7 +2,9 @@ package com.jyothi.ergast;
 
 import android.Manifest;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.arch.paging.PagedList;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
@@ -17,55 +19,42 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.SearchView;
-import android.widget.Toast;
 
+import com.jyothi.ergast.adapter.DriverAdapter;
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.databinding.ActivityMainBinding;
-import com.jyothi.ergast.di.MainActivityModule;
 import com.jyothi.ergast.util.ActivityUtils;
-import com.jyothi.ergast.util.Utils;
+import com.jyothi.ergast.viewmodel.MainViewModel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 
 /**
  * Created by Jyothi on 7/22/16.
  */
 
-public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
+public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
     private static final int REQUEST_ALL_PERMISSIONS = 112;
 
-    private int mPastItems, mVisibleCount, mTotalCount;
-    private boolean mLoading = true;
-    private boolean mSearchIsOn = false;
-    private boolean mEndOfDrivers = false;
+    @Inject
+    public DriverAdapter mAdapter;
 
     @Inject
-    public ItemAdapter mAdapter;
-
-    @Inject
-    public LinearLayoutManager mLayoutManager;
+    public ViewModelProvider.Factory mViewModelFactory;
 
     private ActivityMainBinding mBinding;
-
     private MainViewModel mViewModel;
-
-    private MainActivityComponent mComponent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-
-        mComponent = DaggerMainActivityComponent.builder()
-                .mainActivityModule(new MainActivityModule(this))
-                .build();
-        mComponent.inject(this);
 
         initializeViewModel();
         initDataBinding();
@@ -77,9 +66,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private void initDataBinding() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        mBinding.included.recyclerView.setLayoutManager(mLayoutManager);
+        mBinding.included.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         mBinding.included.recyclerView.setAdapter(mAdapter);
-        mBinding.included.recyclerView.addOnScrollListener(mScrollListener);
         mBinding.included.recyclerView.setVisibility(View.VISIBLE);
 
         mBinding.setModel(mViewModel);
@@ -90,81 +78,25 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         if (ActivityUtils.requestPermissions(this, REQUEST_ALL_PERMISSIONS, allPerms)) {
             Log.i(TAG, "Permissions are there querying");
-            //Showing progress dialog
-            startProgressDialog();
             initializeViewModel();
         }
     }
 
     private void initializeViewModel() {
-        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mViewModel = ViewModelProviders.of(this, mViewModelFactory).get(MainViewModel.class);
 
-        mViewModel.getDrivers().observe(this, new Observer<List<Driver>>() {
-            @Override
-            public void onChanged(@Nullable List<Driver> drivers) {
-                if (drivers != null) {
-                    mAdapter.setItems(drivers);
-                } else {
-                    mAdapter.clearItems();
-                }
-
-                stopProgressDialog();
-            }
-        });
-
-        mViewModel.getQueryDone().observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(@Nullable Boolean queryDone) {
-                mLoading = queryDone;
-            }
-        });
-
-        mViewModel.getEndOfDrivers().observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(@Nullable Boolean endOfDrivers) {
-                mEndOfDrivers = endOfDrivers;
-            }
-        });
-
-        mViewModel.getShowProgress().observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(@Nullable Boolean showProgress) {
-                if (showProgress) {
-                    startProgressDialog();
-                } else {
-                    stopProgressDialog();
-                }
-            }
-        });
+        initializeDrivers();
     }
 
-    RecyclerView.OnScrollListener mScrollListener = new RecyclerView.OnScrollListener() {
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            if (dy > 0) {
-                checkScrolledDown();
+    private void initializeDrivers() {
+        mViewModel.getDrivers().observe(this, new Observer<PagedList<Driver>>() {
+            @Override
+            public void onChanged(@Nullable PagedList<Driver> drivers) {
+                if (drivers != null) {
+                    mAdapter.setList(drivers);
+                }
             }
-        }
-    };
-
-    public void checkScrolledDown() {
-        mVisibleCount = mLayoutManager.getChildCount();
-        mTotalCount = mLayoutManager.getItemCount();
-        mPastItems = mLayoutManager.findFirstVisibleItemPosition();
-
-        if (!mLoading || mSearchIsOn) {
-            return;
-        }
-
-        if ((mVisibleCount + mPastItems) >=
-                (mTotalCount - ((Utils.MIN_PAGES_CONSTANT - 1) * Utils.ITEMS_PER_PAGE_CONSTANT))) {
-            if (mEndOfDrivers) {
-                return;
-            }
-
-            getNextPageItems();
-        }
+        });
     }
 
     public boolean isNetworkAvailable() {
@@ -174,29 +106,16 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    public void getNextPageItems() {
-        if (!isNetworkAvailable()) {
-            Toast.makeText(this, R.string.wifi_or_data_not_enabled, Toast.LENGTH_SHORT).show();
-            mLoading = true;
-            return;
-        } else {
-            mLoading = false;
-        }
-
-        mViewModel.loadNextSetUsers();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        final MenuItem searchItem = menu.findItem(R.id.action_search);
-        SearchView searchView = new SearchView((getSupportActionBar().getThemedContext()));
-        searchItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        searchItem.setActionView(searchView);
-
-        searchView.setOnQueryTextListener(this);
-        searchView.setQueryHint(getString(R.string.enter_driver_id));
+//        final MenuItem searchItem = menu.findItem(R.id.action_search);
+//        SearchView searchView = new SearchView((getSupportActionBar().getThemedContext()));
+//        searchItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+//        searchItem.setActionView(searchView);
+//        searchView.setOnQueryTextListener(this);
+//        searchView.setQueryHint(getString(R.string.enter_driver_id));
 
         return true;
     }
@@ -206,31 +125,45 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         switch (item.getItemId()) {
             case R.id.refresh:
+                mViewModel.removeDriversObserver(this);
                 mViewModel.refresh();
-                mAdapter.clearItems();
-                mViewModel.loadDrivers();
+                resetAdapter(mBinding.included.recyclerView);
+                initializeDrivers();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return true;
-    }
+//    @Override
+//    public boolean onQueryTextSubmit(String query) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onQueryTextChange(String newText) {
+//        mViewModel.clearFilteredList(this);
+//        resetAdapter(mBinding.included.recyclerView);
+//
+//        if (TextUtils.isEmpty(newText)) {
+//            initializeDrivers();
+//        } else {
+//            mViewModel.removeDriversObserver(this);
+//            mViewModel.setFilter(newText);
+//            initializeFilteredDrivers();
+//        }
+//
+//        return true;
+//    }
 
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        mAdapter.getFilter().filter(newText);
+    public void resetAdapter(RecyclerView view) {
+        view.setAdapter(null);
+        view.setLayoutManager(null);
 
-        if (newText.equals("")) {
-            mSearchIsOn = false;
-        } else {
-            mSearchIsOn = true;
-        }
+        mAdapter = new DriverAdapter();
 
-        return false;
+        view.setAdapter(mAdapter);
+        view.setLayoutManager(new LinearLayoutManager(this));
     }
 
     /**
@@ -272,12 +205,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         }
     }
 
-    public void startProgressDialog() {
-        mBinding.included.progressBar.setVisibility(View.VISIBLE);
-    }
-
-    public void stopProgressDialog() {
-        mBinding.included.progressBar.setVisibility(View.GONE);
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
     }
 
     @Override
