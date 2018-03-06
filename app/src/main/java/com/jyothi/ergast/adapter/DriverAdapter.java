@@ -2,10 +2,11 @@ package com.jyothi.ergast.adapter;
 
 import android.view.ViewGroup;
 
+import com.a4direct.blanket.adapter.GenericAdapter;
+import com.a4direct.blanket.adapter.base.Destroy;
+import com.a4direct.blanket.adapter.base.OnItemClickListener;
 import com.jyothi.ergast.R;
 import com.jyothi.ergast.data.Driver;
-import com.jyothi.ergast.interfaces.Destroy;
-import com.jyothi.ergast.interfaces.OnObjectClickListener;
 import com.jyothi.ergast.network.LoadingState;
 import com.jyothi.ergast.viewholder.DriverViewHolder;
 
@@ -13,7 +14,7 @@ import com.jyothi.ergast.viewholder.DriverViewHolder;
  * Created by Jyothi Asapu on 25-01-2018.
  */
 
-public class DriverAdapter extends GenericAdapter<Driver, OnObjectClickListener<Driver>, DriverViewHolder>
+public class DriverAdapter extends GenericAdapter<Driver, OnItemClickListener<Driver>, DriverViewHolder>
         implements Destroy {
 
     private LoadingState mLoadingState;

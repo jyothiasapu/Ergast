@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(@Nullable PagedList<Driver> drivers) {
                 if (drivers != null) {
-                    mAdapter.setList(drivers);
+                    mAdapter.submitList(drivers);
                 }
             }
         });

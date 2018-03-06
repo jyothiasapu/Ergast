@@ -35,11 +35,11 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
     // Android support libraries
-    compile "com.android.support:appcompat-v7:27.0.2"
-    compile "com.android.support:cardview-v7:27.0.2"
-    compile "com.android.support:design:27.0.2"
-    compile "com.android.support:recyclerview-v7:27.0.2"
-    compile "com.android.support:support-v4:27.0.2"
+    compile "com.android.support:appcompat-v7:27.1.0"
+    compile "com.android.support:cardview-v7:27.1.0"
+    compile "com.android.support:design:27.1.0"
+    compile "com.android.support:recyclerview-v7:27.1.0"
+    compile "com.android.support:support-v4:27.1.0"
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     // ViewModel and LiveData
@@ -50,8 +50,7 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:1.0.0"
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
 
-    // Paging
-    implementation "android.arch.paging:runtime:1.0.0-alpha5"
+    implementation 'com.github.jyothiasapu:blanket:1.0.1'
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:2.0.2"
@@ -76,7 +75,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     androidTestImplementation "com.android.support.test.espresso:espresso-intents:3.0.1"
     androidTestImplementation "org.mockito:mockito-core:2.15.0"
-
 }
 
 configurations.all {

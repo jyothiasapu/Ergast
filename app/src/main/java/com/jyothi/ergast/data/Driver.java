@@ -7,7 +7,7 @@ import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.jyothi.ergast.model.BaseObject;
+import com.a4direct.blanket.adapter.base.BaseObject;
 
 import java.util.Objects;
 import java.util.UUID;

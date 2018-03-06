@@ -9,6 +9,8 @@ import com.jyothi.ergast.di.module.ContextModule;
 
 import java.io.File;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 import okhttp3.Cache;

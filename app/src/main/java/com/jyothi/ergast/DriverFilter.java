@@ -6,8 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.widget.Filter;
 
+import com.a4direct.blanket.adapter.base.Destroy;
 import com.jyothi.ergast.data.Driver;
-import com.jyothi.ergast.interfaces.Destroy;
 import com.jyothi.ergast.interfaces.ItemAdapterInterface;
 
 import java.util.ArrayList;

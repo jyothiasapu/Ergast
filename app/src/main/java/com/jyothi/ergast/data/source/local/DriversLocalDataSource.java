@@ -21,9 +21,9 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.support.annotation.NonNull;
 
+import com.a4direct.blanket.adapter.base.Destroy;
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.data.source.DriversDataSource;
-import com.jyothi.ergast.interfaces.Destroy;
 import com.jyothi.ergast.util.AppExecutors;
 
 import java.util.List;

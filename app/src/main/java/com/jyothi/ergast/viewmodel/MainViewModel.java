@@ -17,6 +17,8 @@ import com.jyothi.ergast.network.LoadingState;
 
 import java.util.concurrent.Executor;
 
+import javax.inject.Inject;
+
 /**
  * Created by Jyothi on 7/22/2017.
  */

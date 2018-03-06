@@ -4,16 +4,16 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.TextView;
 
+import com.a4direct.blanket.adapter.base.BaseHolder;
+import com.a4direct.blanket.adapter.base.OnItemClickListener;
 import com.jyothi.ergast.R;
 import com.jyothi.ergast.data.Driver;
-import com.jyothi.ergast.interfaces.OnObjectClickListener;
-import com.jyothi.ergast.viewholder.BaseHolder;
 
 /**
  * Created by Jyothi Asapu on 25-01-2018.
  */
 
-public class DriverViewHolder extends BaseHolder<Driver, OnObjectClickListener<Driver>> {
+public class DriverViewHolder extends BaseHolder<Driver, OnItemClickListener<Driver>> {
 
     public TextView mNationality;
     public TextView mGivenName;
@@ -34,7 +34,7 @@ public class DriverViewHolder extends BaseHolder<Driver, OnObjectClickListener<D
     }
 
     @Override
-    public void bindItem(final Driver driver, @Nullable final OnObjectClickListener<Driver> listener) {
+    public void bindItem(final Driver driver, @Nullable final OnItemClickListener<Driver> listener) {
         mNationality.setText(driver.getNationality());
         mGivenName.setText(driver.getGivenName());
         mUrl.setText(driver.getUrl());
