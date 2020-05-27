@@ -1,6 +1,6 @@
 package com.jyothi.ergast.di.module;
 
-import android.arch.persistence.room.Room;
+import androidx.room.Room;
 import android.content.Context;
 
 import com.jyothi.ergast.data.source.DriversRepository;

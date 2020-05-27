@@ -1,8 +1,8 @@
 package com.jyothi.ergast.interfaces;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.paging.PagedList;
-import android.support.v7.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.paging.PagedList;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.jyothi.ergast.data.Driver;
 

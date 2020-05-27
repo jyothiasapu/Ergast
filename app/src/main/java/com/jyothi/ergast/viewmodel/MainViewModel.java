@@ -1,12 +1,12 @@
 package com.jyothi.ergast.viewmodel;
 
-import android.arch.core.util.Function;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Transformations;
-import android.arch.lifecycle.ViewModel;
-import android.arch.paging.LivePagedListBuilder;
-import android.arch.paging.PagedList;
-import android.support.v7.app.AppCompatActivity;
+import androidx.arch.core.util.Function;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+import androidx.paging.LivePagedListBuilder;
+import androidx.paging.PagedList;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.data.DriverDataSourceFactory;
@@ -16,8 +16,6 @@ import com.jyothi.ergast.interfaces.MainViewInterface;
 import com.jyothi.ergast.network.LoadingState;
 
 import java.util.concurrent.Executor;
-
-import javax.inject.Inject;
 
 /**
  * Created by Jyothi on 7/22/2017.
@@ -63,7 +61,7 @@ public class MainViewModel extends ViewModel implements MainViewInterface {
                         .setPageSize(4).build();
 
         return (new LivePagedListBuilder(mFactory, pagedListConfig))
-                .setBackgroundThreadExecutor(mExecutors)
+                .setFetchExecutor(mExecutors)
                 .build();
     }
 

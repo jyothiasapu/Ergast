@@ -1,7 +1,7 @@
 package com.jyothi.ergast.data;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.paging.DataSource;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.DataSource;
 
 import com.jyothi.ergast.data.source.DriversRepository;
 import com.jyothi.ergast.network.ApiService;
@@ -12,7 +12,7 @@ import java.util.concurrent.Executor;
  * Created by Jyothi on 23-02-2018.
  */
 
-public class DriverDataSourceFactory implements DataSource.Factory {
+public class DriverDataSourceFactory extends DataSource.Factory {
 
     private MutableLiveData<PageKeyedDriverSource> mData;
     private PageKeyedDriverSource mDataSource;

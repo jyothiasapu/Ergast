@@ -16,12 +16,12 @@
 
 package com.jyothi.ergast.data.source.local;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.paging.LivePagedListBuilder;
-import android.arch.paging.PagedList;
-import android.support.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.paging.LivePagedListBuilder;
+import androidx.paging.PagedList;
+import androidx.annotation.NonNull;
 
-import com.a4direct.blanket.adapter.base.Destroy;
+import com.a4direct.blanket.Destroy;
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.data.source.DriversDataSource;
 import com.jyothi.ergast.util.AppExecutors;
@@ -106,7 +106,7 @@ public class DriversLocalDataSource implements DriversDataSource, Destroy {
                 .build();
 
         return new LivePagedListBuilder<Integer, Driver>(mDriversDao.getDrivers(driverId), config)
-                .setBackgroundThreadExecutor(mAppExecutors.diskIO())
+                .setFetchExecutor(mAppExecutors.diskIO())
                 .build();
     }
 

@@ -1,8 +1,8 @@
 package com.jyothi.ergast.data;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.paging.PageKeyedDataSource;
-import android.support.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.PageKeyedDataSource;
+import androidx.annotation.NonNull;
 
 import com.jyothi.ergast.data.source.DriversDataSource;
 import com.jyothi.ergast.data.source.DriversRepository;

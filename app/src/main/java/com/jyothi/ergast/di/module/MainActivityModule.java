@@ -1,15 +1,13 @@
 package com.jyothi.ergast.di.module;
 
-import android.app.Application;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModelProvider;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.jyothi.ergast.adapter.DriverAdapter;
 import com.jyothi.ergast.data.DriverDataSourceFactory;
 import com.jyothi.ergast.data.PageKeyedDriverSource;
 import com.jyothi.ergast.data.source.DriversRepository;
 import com.jyothi.ergast.network.ApiService;
-import com.jyothi.ergast.util.AppExecutors;
 import com.jyothi.ergast.viewmodel.MainViewModel;
 import com.jyothi.ergast.viewmodel.ViewModelFactory;
 

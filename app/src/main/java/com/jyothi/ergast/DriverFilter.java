@@ -1,12 +1,13 @@
 package com.jyothi.ergast;
 
-import android.arch.paging.PagedList;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.widget.Filter;
 
-import com.a4direct.blanket.adapter.base.Destroy;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.paging.PagedList;
+
+import com.a4direct.blanket.Destroy;
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.interfaces.ItemAdapterInterface;
 

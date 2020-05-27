@@ -16,11 +16,11 @@
 
 package com.jyothi.ergast.data.source;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.paging.PagedList;
-import android.support.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.paging.PagedList;
+import androidx.annotation.NonNull;
 
-import com.a4direct.blanket.adapter.base.Destroy;
+import com.a4direct.blanket.Destroy;
 import com.jyothi.ergast.data.Driver;
 import com.jyothi.ergast.data.source.local.DriversLocalDataSource;
 

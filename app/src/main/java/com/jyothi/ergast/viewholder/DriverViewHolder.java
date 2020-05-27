@@ -1,11 +1,11 @@
 package com.jyothi.ergast.viewholder;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.View;
 import android.widget.TextView;
 
-import com.a4direct.blanket.adapter.base.BaseHolder;
-import com.a4direct.blanket.adapter.base.OnItemClickListener;
+import com.a4direct.blanket.adapter.BaseHolder;
+import com.a4direct.blanket.adapter.BaseOnClickListener;
 import com.jyothi.ergast.R;
 import com.jyothi.ergast.data.Driver;
 
@@ -13,7 +13,7 @@ import com.jyothi.ergast.data.Driver;
  * Created by Jyothi Asapu on 25-01-2018.
  */
 
-public class DriverViewHolder extends BaseHolder<Driver, OnItemClickListener<Driver>> {
+public class DriverViewHolder extends BaseHolder<Driver, BaseOnClickListener<Driver>> {
 
     public TextView mNationality;
     public TextView mGivenName;
@@ -34,7 +34,7 @@ public class DriverViewHolder extends BaseHolder<Driver, OnItemClickListener<Dri
     }
 
     @Override
-    public void bindItem(final Driver driver, @Nullable final OnItemClickListener<Driver> listener) {
+    public void bindItem(final Driver driver, @Nullable final BaseOnClickListener<Driver> listener) {
         mNationality.setText(driver.getNationality());
         mGivenName.setText(driver.getGivenName());
         mUrl.setText(driver.getUrl());
